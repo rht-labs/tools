@@ -8,13 +8,13 @@ function createMBaaSes(){
 	return function(cb){ 
 		var projectArray = [];
 		var MBaaSName;	
-		console.log(config);
+		//console.log(config);
 		config.environments.forEach(function(environment){
 			MBaaSName = config.projectName+"-"+environment;
 			projectArray.push(openshiftcalls.createOpenshiftProject(MBaaSName));
 			projectArray.push(openshiftcalls.createOpenshiftApp(MBaaSName));
-			projectArray.push(fhCalls.createMBaaSTarget(MBaaSName));
-			projectArray.push(fhCalls.createMBaaSEnvironment(MBaaSName));
+			// projectArray.push(fhCalls.createMBaaSTarget(MBaaSName));
+			// projectArray.push(fhCalls.createMBaaSEnvironment(MBaaSName));
 		});
 		async.series(projectArray, function(err, res){
 			cb(err, res);
@@ -25,10 +25,11 @@ function createMBaaSes(){
 
 exports.process= function(cb){
 	var funcArray = [];
+	funcArray.push(openshiftcalls.openshiftLogout());
 	funcArray.push(openshiftcalls.openshiftLogin());
-	// funcArray.push(fhCalls.rhMAPTarget());
-	// funcArray.push(fhCalls.rhMAPLogin());
-	// funcArray.push(createMBaaSes());
+	funcArray.push(fhCalls.rhMAPTarget());
+	funcArray.push(fhCalls.rhMAPLogin());
+	funcArray.push(createMBaaSes());
 	// funcArray.push(fhCalls.createRHMAPProject());
 	async.series(funcArray, function(err, res){
 		if (err){

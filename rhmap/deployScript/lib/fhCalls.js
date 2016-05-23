@@ -1,5 +1,5 @@
 var systemCall = require('./systemCall.js'),
-config = ('../config.js');
+config = require('../config.js');
 
 exports.createMBaaSTarget = function(MBaaSName){
 	return function(cb){
@@ -31,6 +31,7 @@ exports.rhMAPTarget = function(){
 			if (err){
 				cb(err, null)
 			} else {
+				//Successfully targeted: http://testing.grdryn3.skunkhenry.com/ User: testing-admin@example.com
 				cb(null, result)
 			}
 		});
@@ -43,6 +44,7 @@ exports.rhMAPLogin = function(){
 			if (err){
 				cb(err, null)
 			} else {
+				//Successfully logged into http://testing.grdryn3.skunkhenry.com/
 				cb(null, result)
 			}
 		});
