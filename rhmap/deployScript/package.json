@@ -1,0 +1,21 @@
+{
+  "name": "rhmap-pbi-script",
+  "version": "0.0.1",
+  "description": "Script to install RHMAP MBaaS on openshift and configure RHMAP domain",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node_modules/.bin/mocha -w"
+  },
+  "author": "Philip Hayes",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^2.0.0-rc.5",
+    "q": "^1.4.1"
+  },
+  "devDependencies": {
+    "mocha": "^2.5.1",
+    "should": ">= 0.0.1",
+    "proxyquire": "^1.7.9"
+  }
+}

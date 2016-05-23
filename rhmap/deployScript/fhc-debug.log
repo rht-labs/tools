@@ -1,0 +1,38 @@
+silly login POST data { u: 'undefined', p: 'undefined', d: undefined }
+verbose feedhenry url http://testing.grdryn3.skunkhenry.com/
+silly POST /box/srv/1.1/act/sys/auth/login
+silly url, unparsed http://testing.grdryn3.skunkhenry.com/
+verbose resolveUrl - IN /box/srv/1.1/act/sys/auth/login
+verbose resolveUrl - OUT http://testing.grdryn3.skunkhenry.com/box/srv/1.1/act/sys/auth/login
+verbose calling url http://testing.grdryn3.skunkhenry.com/box/srv/1.1/act/sys/auth/login payload: { u: 'undefined', p: 'undefined', d: undefined }
+silly port 80
+silly cookie feedhenry=xmdbhta33naqnjz72x6uxegw;
+silly nocache false
+silly explain level 0
+verbose getHeaders { accept: 'application/json',
+verbose getHeaders   cookie: 'feedhenry=xmdbhta33naqnjz72x6uxegw;',
+verbose getHeaders   'User-Agent': 'FHC/1.1.5 darwin/15.3.0',
+verbose getHeaders   'content-type': 'application/json',
+verbose getHeaders   'content-length': 33 }
+verbose what... { u: 'undefined', p: 'undefined', d: undefined }
+silly writing json { u: 'undefined', p: 'undefined', d: undefined }
+silly headers { accept: 'application/json',
+silly headers   cookie: 'feedhenry=xmdbhta33naqnjz72x6uxegw;',
+silly headers   'User-Agent': 'FHC/1.1.5 darwin/15.3.0',
+silly headers   'content-type': 'application/json',
+silly headers   'content-length': 33 }
+silly getProxy null
+silly response headers { server: 'nginx/1.8.0',
+silly response headers   date: 'Mon, 23 May 2016 16:35:11 GMT',
+silly response headers   'content-type': 'application/json;charset=UTF-8',
+silly response headers   'content-length': '99',
+silly response headers   connection: 'close',
+silly response headers   expires: 'Sat, 6 May 1995 12:00:00 GMT',
+silly response headers   'cache-control': 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
+silly response headers   p3p: 'CP="ALL ADM DEV PSAi COM OUR OTRo STP IND ONL" policyref="/box/p3p.xml"',
+silly response headers   pragma: 'no-cache',
+silly response headers   'last-modified': 'Mon, 23 May 2016 16:35:11 GMT',
+silly response headers   etag: '"z+98DEe8lxzDEeIUBT9oNg=="',
+silly response headers   vary: 'Accept-Encoding' }
+ERR! login failed: not-valid
+verbose exit [ 1, false ]
