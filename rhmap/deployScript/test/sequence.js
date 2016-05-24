@@ -64,6 +64,20 @@ var fhCallsProxy = {
 			cb(null, {success: true});
 		}
 
+	},
+	createRHMAPTeam: function(){
+		return function(cb){
+			
+			cb(null, {success: true});
+		}
+
+	},
+	createRHMAPProject: function(){
+		return function(cb){
+			
+			cb(null, {success: true});
+		}
+
 	}
 };
 

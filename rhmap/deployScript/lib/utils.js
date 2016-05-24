@@ -28,3 +28,16 @@ exports.validateJSON = function(data, key, value ){
 		return false;
 	}
 }
+
+exports.getJSONProperty = function(data, key){
+	try {
+
+		var dataJSON = JSON.parse(data);
+
+		return dataJSON[key];
+	} 
+	catch(err){
+		return false;
+	}
+	
+}

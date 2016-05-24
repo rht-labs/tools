@@ -46,7 +46,8 @@ exports.process= function(cb){
 	funcArray.push(fhCalls.rhMAPTarget());
 	funcArray.push(fhCalls.rhMAPLogin());
 	funcArray.push(createMBaaSes());
-	// funcArray.push(fhCalls.createRHMAPProject());
+	funcArray.push(fhCalls.createRHMAPProject());
+	funcArray.push(fhCalls.createRHMAPTeam());
 	async.series(funcArray, function(err, results){
 		
 		if (err){
