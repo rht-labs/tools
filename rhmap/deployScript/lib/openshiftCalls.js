@@ -2,6 +2,8 @@ var systemCall = require('./systemCall.js'),
 configProvider = require('../config.js'),
 utils = require('./utils.js');
 
+
+// Perform logout from openshift using "oc logout"
 exports.openshiftLogout = function(){
 	return function(cb){
 		systemCall.execute('oc', ['logout'], {label:'Logging out of Openshift '}, function(err, result){
@@ -14,19 +16,20 @@ exports.openshiftLogout = function(){
 	}
 }
 
+// Perform login to openshift using parameters from config.openshift using "oc login"
+// config.openshift.hostname, config.openshift.username, config.openshift.password
+// Once login is complete, openshift status is called to check user is logged in using "oc status"
 exports.openshiftLogin = function(){
 	return function(cb){
 		var config = configProvider.getConfig();
-		//console.log(config);
+	
 		if (!config || !config.openshift || !config.openshift.hostname || !config.openshift.username || !config.openshift.password){
 			return cb("parameter missing", {success:false})
 		}
 		systemCall.execute('oc', ['login',config.openshift.hostname, '--insecure-skip-tls-verify=true', '--username='+config.openshift.username, '--password='+config.openshift.password], {label:'Logging into OpenShift'}, function(err, result){
-			//console.log(result)
 			if (err){
 				cb(err, null)
 			} else if (utils.validateStringResponse(result,'Login failed')) {
-				//console.log('vaidation failed')
 				cb(null, {success:false})
 
 			} else {
@@ -50,6 +53,8 @@ exports.openshiftLogin = function(){
 	}
 }
 
+// Perform openshoft create project using "oc new-project"
+// parameter MBaaSName
 exports.createOpenshiftProject = function(MBaaSName){
 	return function(cb){
 		if (!MBaaSName){
@@ -72,6 +77,11 @@ exports.createOpenshiftProject = function(MBaaSName){
 	}
 }
 
+
+// Perform openshift create app using "oc new-app"
+// Parameter MBaaSName
+// Uses config.project.template
+// Validates response contains string "Success" 
 exports.createOpenshiftApp = function(MBaaSName){
 	return function(cb){
 		var config = configProvider.getConfig();
@@ -79,7 +89,7 @@ exports.createOpenshiftApp = function(MBaaSName){
 			return cb("MBaaSName parameter missing", {success:false})
 		}
 
-		systemCall.execute('oc', ['new-app', '-f /Users/philiphayes/projects/innovationLab/tools/rhmap/deployScript/'+config.project.template , '-p MBAAS_ROUTER_DNS='+MBaaSName+'.apps.osm1.feedhenry.net'], {label:'Creating MBaaS '+ MBaaSName}, function(err, result){
+		systemCall.execute('oc', ['new-app', '-f ../'+config.project.template , '-p MBAAS_ROUTER_DNS='+MBaaSName+'.apps.osm1.feedhenry.net'], {label:'Creating MBaaS '+ MBaaSName}, function(err, result){
 			if (err){
 				return cb(err, null)
 			} else {

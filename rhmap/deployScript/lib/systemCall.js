@@ -3,7 +3,7 @@ const spawn = require('child_process').spawn;
 
 
 exports.execute = function(command, args, options, cb){
-  console.log(args)
+  //console.log(args)
   if (options && options.label){
     console.log(options.label)
   }
@@ -15,11 +15,12 @@ exports.execute = function(command, args, options, cb){
   });
 
   sysCommand.on('close', function(code) {
-    console.log(chunks);
+    //console.log(chunks);
     cb(null, chunks)
   });
 
   sysCommand.on('error', function(err) {
+    console.log(err)
     cb(err, null)
   });
 
