@@ -3,6 +3,7 @@ const spawn = require('child_process').spawn;
 
 
 exports.execute = function(command, args, options, cb){
+  console.log(args)
   if (options && options.label){
     console.log(options.label)
   }

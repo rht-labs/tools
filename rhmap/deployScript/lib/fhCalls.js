@@ -1,25 +1,51 @@
 var systemCall = require('./systemCall.js'),
-config = require('../config.js');
+configProvider= require('../config.js'),
+utils = require('./utils.js');
 
 exports.createMBaaSTarget = function(MBaaSName){
 	return function(cb){
-		systemCall.execute('fhc', ['admin','mbaas', 'create', '--id='+MBaaSName, '--type=openshift3', '--fhMbaasHost=https://'+MBaaSName+'.apps.osm1.feedhenry.net', '--provisionMBaaS=true', '--type_target=openshift3', '--url=https://osm1-master1.feedhenry.net:8443', '--username='+ config.username, '--password='+config.password, '--routerDNSUrl=*.apps.osm1.feedhenry.net', '--servicekey=""'], {label:'Creating MBaaS Target '+ MBaaSName}, function(err, result){
+		var config = configProvider.getConfig();
+		if (!MBaaSName){
+			return cb('no MBaaSName parameter', {success: false});
+		}
+		if (!config || !config.openshift || !config.openshift.hostname || !config.openshift.username || !config.openshift.password || !config.openshift.port || !config.openshift.dnsUrl){
+			return cb("parameter missing", {success:false})
+		}
+		systemCall.execute('fhc', ['admin','mbaas', 'create', '--id='+MBaaSName, '--type=openshift3', '--fhMbaasHost=https://'+MBaaSName+config.openshift.hostname, '--provisionMBaaS=true', '--type_target=openshift3', '--url=https://'+config.openshift.hostname+config.openshift.port, '--username='+ config.openshift.username, '--password='+config.openshift.password, '--routerDNSUrl='+config.openshift.dnsUrl, '--servicekey=""'], {label:'Creating MBaaS Target '+ MBaaSName}, function(err, result){
 			if (err){
-				cb(err, null)
+				return cb(err, null)
 			} else {
-				cb(null, result)
+				if (utils.validateJSON(result, "_id", MBaaSName)) {
+					config.deployed.MBaaS.push(MBaaSName);
+					configProvider.update(config);
+					cb(null, {success:true});
+				} else {
+					cb('Error creating MBaaS target', {success: false});
+				}
+				
 			}
 		});
 	}
 }
 
 exports.createMBaaSEnvironment = function(MBaaSName){
+	var MBaaSNameEnv = MBaaSName + '-env';
 	return function(cb){
-		systemCall.execute('fhc', ['admin', 'environments', 'create', '--id='+MBaaSName, '--label='+MBaaSName, '--targets='+MBaaSName], {label: 'Creating MBaaS Environment '+ MBaaSName}, function(err, result){
+		var config = configProvider.getConfig();
+		if (!MBaaSName){
+			return cb('no MBaaSName parameter', {success: false});
+		}
+		systemCall.execute('fhc', ['admin', 'environments', 'create', '--id='+MBaaSNameEnv, '--label='+MBaaSNameEnv, '--targets='+MBaaSName], {label: 'Creating MBaaS Environment '+ MBaaSNameEnv}, function(err, result){
 			if (err){
 				cb(err, null)
 			} else {
-				cb(null, result)
+				if (utils.validateJSON(result, "_id", MBaaSNameEnv)) {
+					config.deployed.environments.push(MBaaSNameEnv);
+					configProvider.update(config);
+					cb(null, {success:true});
+				} else {
+					cb('Error creating Environment', {success: false});
+				}
 			}
 		});
 	}
@@ -27,12 +53,22 @@ exports.createMBaaSEnvironment = function(MBaaSName){
 
 exports.rhMAPTarget = function(){
 	return function(cb){
-		systemCall.execute('fhc', ['target', config.FHDomain], {label:'Setting FHC Target'},function(err, result){
+		var config = configProvider.getConfig();
+		if (!config || !config.rhmap || !config.rhmap.hostname){
+			return cb('Invalid rhmap configuration', {success: false});
+		}
+		systemCall.execute('fhc', ['target', config.rhmap.hostname], {label:'Setting FHC Target'},function(err, result){
 			if (err){
 				cb(err, null)
 			} else {
 				//Successfully targeted: http://testing.grdryn3.skunkhenry.com/ User: testing-admin@example.com
-				cb(null, result)
+				if (utils.validateStringResponse(result, 'Successfully targeted')) {
+
+					cb(null, {success: true});
+				} else {
+					cb("Error targetting fh", {success: false});
+				}
+				
 			}
 		});
 	}
@@ -40,12 +76,20 @@ exports.rhMAPTarget = function(){
 
 exports.rhMAPLogin = function(){
 	return function(cb){
-		systemCall.execute('fhc',['login', config.FHUsername, config.FHPassword], {label: 'Logging into RHMAP Core'},function(err, result){
+		var config = configProvider.getConfig();
+		if (!config || !config.rhmap || !config.rhmap.username || !config.rhmap.password){
+			return cb('Invalid rhmap configuration', {success: false});
+		}
+		systemCall.execute('fhc',['login', config.rhmap.username, config.rhmap.password], {label: 'Logging into RHMAP Core'},function(err, result){
 			if (err){
 				cb(err, null)
 			} else {
 				//Successfully logged into http://testing.grdryn3.skunkhenry.com/
-				cb(null, result)
+				if (utils.validateStringResponse(result, 'Successfully logged into')) {
+					cb(null, {success: true});
+				} else {
+					cb("Error logging into fh", {success: false});
+				}
 			}
 		});
 	}
