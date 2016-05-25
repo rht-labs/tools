@@ -133,25 +133,27 @@ exports.createRHMAPTeam = function(){
 			"users": [],
 			"business-objects":{
 				"cluster/reseller/customer/domain/project":[
-				config.deployed.projectId
+					config.deployed.projectId
 				],
 				"cluster":[
-				"sam1-core"
+					"sam1-core"
 				],
 				"cluster/reseller":[
-				"6Oz0VqOQoT5KDG5Fj_0c_DXN"
+					"6Oz0VqOQoT5KDG5Fj_0c_DXN"
 				],
 				"cluster/reseller/customer":[
-				"IlV_eqt_AArFNGB-KSr0oZ9F"
+					"IlV_eqt_AArFNGB-KSr0oZ9F"
 				],
 				"cluster/reseller/customer/domain":[
-				"v5cu7xtd7abtig5yyproaozc"
+					"v5cu7xtd7abtig5yyproaozc"
 				],
-				"cluster/reseller/customer/domain/admin/environment":config.deployed.environments,
+				"cluster/reseller/customer/domain/admin/environment":
+					config.deployed.environments,
 				"cluster/reseller/customer/domain/admin":[
-				"*"
+					"*"
 				],
-				"cluster/reseller/customer/domain/admin/mbaas-target":config.deployed.MBaaS
+				"cluster/reseller/customer/domain/admin/mbaas-target":
+					config.deployed.MBaaS
 			}
 		}
 		console.log(teamConfig);
@@ -161,11 +163,31 @@ exports.createRHMAPTeam = function(){
 			if (err){
 				cb(err, null)
 			} else {
+				var teamId = utils.getJSONProperty(result, '_id');
+				config.deployed.teamId = teamId;
+				cb(null, {success:true})
+			}
+		});
+	}
+}
+
+exports.createRHUser = function(){
+	return function(cb){
+		var config = configProvider.getConfig();
+		systemCall.execute('fhc', ['admin-users', 'create' ], {label:'Creating RH MAP User'},function(err, result){
+			console.log(result);
+			if (err){
+				cb(err, null)
+			} else {
+				var teamId = utils.getJSONProperty(result, '_id');
+				config.deployed.teamId = teamId;
 				cb(null, {success:true})
 			}
 		});
 	}
 
 
-
 }
+
+
+
