@@ -4,6 +4,8 @@ var target = require(process.env.FHMODULE_HOME+'/lib/target.js');
 var login = require(process.env.FHMODULE_HOME+'/lib/login.js');
 var mbaas = require(process.env.FHMODULE_HOME+'/lib/mbaas.js');
 var init = require(process.env.FHMODULE_HOME+'/lib/init.js');
+var environment = require(process.env.FHMODULE_HOME+'/lib/environment.js');
+var team = require(process.env.FHMODULE_HOME+'/lib/team.js');
 
 // get arguments passed in by file
 init.getArgs(function(err, args){
@@ -40,13 +42,19 @@ function finish(output, changed ){
 
 function doAction(action, args){
   if (action == 'target'){
-    target.setTarget(args['target'], finish);
+    target.set(args['target'], finish);
   }
   else if (action == 'login'){
     login.doLogin(args['username'], args['password'], finish);
   }
   else if (action == 'createMBaaSTarget'){
-    mbaas.createMBaaSTarget(args, finish);
+    mbaas.create(args, finish);
+  }
+  else if (action == 'createEnvironment'){
+    environment.create(args, finish);
+  }
+  else if (action == 'createTeam'){
+    team.create(args, finish);
   }
 }
 

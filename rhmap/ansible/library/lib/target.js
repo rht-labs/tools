@@ -24,4 +24,4 @@ function setTarget(target, cb){
 
 }
 
-exports.setTarget = setTarget;
+exports.set = setTarget;

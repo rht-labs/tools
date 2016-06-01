@@ -51,4 +51,4 @@ function createMBaaSTarget(args, cb){
 
 }
 
-exports.createMBaaSTarget = createMBaaSTarget;
+exports.create = createMBaaSTarget;

@@ -1,6 +1,0 @@
-verbose getHeaders { cookie: 'feedhenry=sjlmhxbhg7aod4t6sgalge6x;',
-verbose getHeaders   'User-Agent': 'FHC/1.1.5 darwin/15.3.0' }
-verbose feedhenry url http://testing.grdryn3.skunkhenry.com/
-ERR! Error - not 2xx status code.
-ERR! {"userDetail":"Invalid MBaaS target: projectNa","systemDetail":"can not read mbaas_target - 'Invalid MBaaS target: projectNa'","code":"FH-SUPERCORE-ERROR"}
-verbose exit [ 1, false ]

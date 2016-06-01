@@ -16,7 +16,7 @@ var fhc = {
 describe('fh target calls', function () {
   it('should not change target ', function (done) {
   	var target = proxyquire('../lib/target.js', {'../node_modules/fh-fhc': fhc});
-  	target.setTarget('https://target.feedhenry.com', function(response, changed){
+  	target.set('https://target.feedhenry.com', function(response, changed){
 		response.target.should.equal('https://target.feedhenry.com');
 		changed.should.equal(false);
 		done();
@@ -24,7 +24,7 @@ describe('fh target calls', function () {
   });
   it('should change target ', function (done) {
     var target = proxyquire('../lib/target.js', {'../node_modules/fh-fhc': fhc});
-    target.setTarget('https://newtarget.feedhenry.com', function(response, changed){
+    target.set('https://newtarget.feedhenry.com', function(response, changed){
     response.target.should.equal('https://newtarget.feedhenry.com');
     changed.should.equal(true);
     done();

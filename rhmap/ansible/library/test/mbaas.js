@@ -7,21 +7,19 @@ var fhc = {
 				var response = null,
 				err = null;
 
-				if (arguments.id == 'test-duplicate'){
-					err = 'Error - not 2xx status code.{"userDetail":"E11000 duplicate key error index: fh-supercore.domainmbaas.$id_1_domain_1  dup key: { : \"projectName\", : \"testing\" }","systemDetail":"can not create mbaas_target - \'E11000 duplicate key error index: fh-supercore.domainmbaas.$id_1_domain_1  dup key: { : \"projectName\", : \"testing\" }\'","code":"FH-SUPERCORE-ERROR"}';
-				} else {
-					response = {
-			          "owner": "3ttcniemc36vavcfagdfcdxe",
-			          "fhMbaasHost": "https://ph-mbaas-test-dev.apps.osm1.feedhenry.net",
-			          "url": "https://osm1-master1.feedhenry.net:8443",
-			          "username": arguments.username,
-			          "routerDNSUrl": "*.apps.osm1.feedhenry.net",
-			          "servicekey": "\"\"",
-			          "_id": "test-mbaas",
-			          "type": "openshift3",
-			          "cacheKey": "ph-mbaas-test-dev-mbaas-openshiftdeploy-1464027416578"
-			        }
-		    	}
+				
+				response = {
+		          "owner": "3ttcniemc36vavcfagdfcdxe",
+		          "fhMbaasHost": "https://ph-mbaas-test-dev.apps.osm1.feedhenry.net",
+		          "url": "https://osm1-master1.feedhenry.net:8443",
+		          "username": arguments.username,
+		          "routerDNSUrl": "*.apps.osm1.feedhenry.net",
+		          "servicekey": "\"\"",
+		          "_id": "test-mbaas",
+		          "type": "openshift3",
+		          "cacheKey": "ph-mbaas-test-dev-mbaas-openshiftdeploy-1464027416578"
+		        }
+		    	
 				cb(err, response);
 			},
 			read: function(arguments, cb){
@@ -63,7 +61,7 @@ describe('fh MBaaS calls', function () {
     }
 
   	var mbaas = proxyquire('../lib/mbaas.js', {'../node_modules/fh-fhc': fhc});
-  	mbaas.createMBaaSTarget(args, function(response, changed){
+  	mbaas.create(args, function(response, changed){
 		response.username.should.equal(args.openshiftUsername);
 		changed.should.equal(true);
 		done();
@@ -80,7 +78,7 @@ describe('fh MBaaS calls', function () {
     }
 
   	var mbaas = proxyquire('../lib/mbaas.js', {'../node_modules/fh-fhc': fhc});
-  	mbaas.createMBaaSTarget(args, function(response, changed){
+  	mbaas.create(args, function(response, changed){
 		
 		changed.should.equal(false);
 		done();
@@ -91,7 +89,7 @@ describe('fh MBaaS calls', function () {
   	var args = {}
 
   	var mbaas = proxyquire('../lib/mbaas.js', {'../node_modules/fh-fhc': fhc});
-  	mbaas.createMBaaSTarget(args, function(response, changed){
+  	mbaas.create(args, function(response, changed){
 		
 		changed.should.equal(false);
 		done();
