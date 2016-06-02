@@ -25,7 +25,7 @@ var fhc = {
 			read: function(arguments, cb){
 				var response = null,
 				err = null;
-				if (arguments.id == 'test-duplicate') {
+				if (arguments.id == 'test-duplicate-test') {
 					response = {
 					  "owner": "3ttcniemc36vavcfagdfcdxe",
 					  "fhMbaasHost": "https://projectname.osm1-master1.feedhenry.net",
@@ -57,7 +57,8 @@ describe('fh MBaaS calls', function () {
         url: 'https://osm1-master1.feedhenry.net:8443',
         openshiftUsername: 'test',
         openshiftPassword: 'Red^Hat^Mobile^test^account^1.',
-        routerDNSUrl: '*.apps.osm1.feedhenry.net'
+        routerDNSUrl: '*.apps.osm1.feedhenry.net',
+        environment: 'test'
     }
 
   	var mbaas = proxyquire('../lib/mbaas.js', {'../node_modules/fh-fhc': fhc});
@@ -74,7 +75,8 @@ describe('fh MBaaS calls', function () {
         url: 'https://osm1-master1.feedhenry.net:8443',
         openshiftUsername: 'test',
         openshiftPassword: 'Red^Hat^Mobile^test^account^1.',
-        routerDNSUrl: '*.apps.osm1.feedhenry.net'
+        routerDNSUrl: '*.apps.osm1.feedhenry.net',
+        environment: 'test'
     }
 
   	var mbaas = proxyquire('../lib/mbaas.js', {'../node_modules/fh-fhc': fhc});

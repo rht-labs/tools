@@ -6,6 +6,7 @@ var mbaas = require(process.env.FHMODULE_HOME+'/lib/mbaas.js');
 var init = require(process.env.FHMODULE_HOME+'/lib/init.js');
 var environment = require(process.env.FHMODULE_HOME+'/lib/environment.js');
 var team = require(process.env.FHMODULE_HOME+'/lib/team.js');
+var project = require(process.env.FHMODULE_HOME+'/lib/project.js');
 
 // get arguments passed in by file
 init.getArgs(function(err, args){
@@ -41,6 +42,7 @@ function finish(output, changed ){
 }
 
 function doAction(action, args){
+  //finish(args)
   if (action == 'target'){
     target.set(args['target'], finish);
   }
@@ -55,6 +57,9 @@ function doAction(action, args){
   }
   else if (action == 'createTeam'){
     team.create(args, finish);
+  }
+  else if (action == 'createProject'){
+    project.create(args, finish);
   }
 }
 

@@ -23,12 +23,12 @@ var fhc = {
 			read: function(arguments, cb){
 				var response = null,
 				err = null;
-				if (arguments.id == 'test-duplicate') {
+				if (arguments.id == 'test-duplicate-test') {
 				  response = { 
 				  	  created: '2016-06-01T17:56:35.732Z',
 					  modified: '2016-06-01T17:56:35.732Z',
 					  target:
-					   { _label: 'test-duplicate',
+					   { _label: 'test-duplicate-test',
 					     _env: 'test-duplicate',
 					     type: 'openshift3',
 					     enabled: true,
@@ -37,8 +37,8 @@ var fhc = {
 					     __v: 0,
 					     _id: '574f1253bec3708e43f586a5',
 					     bearerToken: 'SQFXSBQNXdCYYeJc6TqZEGSufn5DDivB-oqnFduoV8M',
-					     label: 'test-duplicate',
-					     id: 'test-duplicate',
+					     label: 'test-duplicate-test',
+					     id: 'test-duplicate-test',
 					     servicekey: 'd1738b17303f483092cdd6ea049d1e455e2d07a55454d217c9e4e59dca5c5a9e',
 					     routerDNSUrl: '*.apps.osm1.feedhenry.net',
 					     url: 'https://osm1-master1.feedhenry.net:8443',
@@ -50,7 +50,7 @@ var fhc = {
 					  order: 2,
 					  domain: 'testing',
 					  owner: '3ttcniemc36vavcfagdfcdxe',
-					  label: 'test-duplicate',
+					  label: 'test-duplicate-test',
 					  id: 'test-duplicate',
 					  _id: '574f21d3b04bb86658e45ec1',
 					  __v: 0,
@@ -69,7 +69,8 @@ var fhc = {
 describe('fh Environment calls', function () {
   it('should create Environment ', function (done) {
   	var args = {
-        mbaasName: 'projectName'
+        mbaasName: 'projectName',
+        environment: 'test'
     }
 
   	var environment = proxyquire('../lib/environment.js', {'../node_modules/fh-fhc': fhc});
@@ -82,7 +83,8 @@ describe('fh Environment calls', function () {
   });
   it('should not create duplicate environment ', function (done) {
   	var args = {
-        mbaasName: 'test-duplicate'
+        mbaasName: 'test-duplicate',
+        environment: 'test'
     }
 
   	var environment = proxyquire('../lib/environment.js', {'../node_modules/fh-fhc': fhc});

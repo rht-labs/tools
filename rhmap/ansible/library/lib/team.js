@@ -1,11 +1,20 @@
 'use strict';
 var fhc = require('../node_modules/fh-fhc');
+var utils = require(process.env.FHMODULE_HOME+'/lib/utils.js');
 
 function create(args, cb){
   //['admin', 'environments', 'create', '--id='+MBaaSNameEnv, '--label='+MBaaSNameEnv, '--targets='+MBaaSName]
   if (!args['mbaasName']){
   	return cb({err: "Missing argument"}, false);
   }
+  //return cb(args['mbaases']);
+  
+  var mbaases = args['mbaases'].split(",");
+  var environments = args['environments'].split(",");
+  // var environments = [];
+  // args['environments'].forEach(function(environment){
+  //   environments.push(environment.output.id);
+  // })
   var teamName = args['mbaasName'] + 'developer';
   var teamConfig = {
     "name": teamName,
@@ -18,7 +27,7 @@ function create(args, cb){
     "users": [],
     "business-objects":{
       "cluster/reseller/customer/domain/project":[
-      
+        args['projectGuid']
       ],
       "cluster":[
         "sam1-core"
@@ -33,13 +42,12 @@ function create(args, cb){
         "v5cu7xtd7abtig5yyproaozc"
       ],
       "cluster/reseller/customer/domain/admin/environment":
-        [args['mbaasName']],
+        environments,
       "cluster/reseller/customer/domain/admin":[
         "*"
       ],
       "cluster/reseller/customer/domain/admin/mbaas-target":
-        [args['mbaasName']]
-    }
+        mbaases    }
   }
 
   //admin.teams.read requires a team guid, which we don't have so we need to read and loop through the list
