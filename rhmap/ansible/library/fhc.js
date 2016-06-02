@@ -7,6 +7,7 @@ var init = require(process.env.FHMODULE_HOME+'/lib/init.js');
 var environment = require(process.env.FHMODULE_HOME+'/lib/environment.js');
 var team = require(process.env.FHMODULE_HOME+'/lib/team.js');
 var project = require(process.env.FHMODULE_HOME+'/lib/project.js');
+var user = require(process.env.FHMODULE_HOME+'/lib/user.js');
 
 // get arguments passed in by file
 init.getArgs(function(err, args){
@@ -60,6 +61,9 @@ function doAction(action, args){
   }
   else if (action == 'createProject'){
     project.create(args, finish);
+  }
+  else if (action == 'createUser'){
+    user.create(args, finish);
   }
 }
 
