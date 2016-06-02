@@ -8,13 +8,16 @@ function create(args, cb){
   	return cb({err: "Missing argument"}, false);
   }
   //return cb(args['mbaases']);
+  var mbaases = [],
+  environments = [];
+  if (args['mbaases']){
+    mbaases = args['mbaases'].split(",");
+  }
+  if (args['environments']){
+    environments = args['environments'].split(",");
+  }
   
-  var mbaases = args['mbaases'].split(",");
-  var environments = args['environments'].split(",");
-  // var environments = [];
-  // args['environments'].forEach(function(environment){
-  //   environments.push(environment.output.id);
-  // })
+
   var teamName = args['mbaasName'] + 'developer';
   var teamConfig = {
     "name": teamName,

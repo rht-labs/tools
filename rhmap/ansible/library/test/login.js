@@ -46,13 +46,14 @@ describe('fh login calls', function () {
   		
   	});
   });
-  it('should not login to fh domain, user already logged in', function (done) {
-  	var login = proxyquire('../lib/login.js', {'../node_modules/fh-fhc': fhc});
-  	login.doLogin('oldUser', 'oldPass', function(response, changed){	
-		response.username.should.equal('oldUser');
-		changed.should.equal(false);
-		done();
+  // This test is no longer valid, we are now always logging in the user to ensure the session is valid
+  // it('should not login to fh domain, user already logged in', function (done) {
+  // 	var login = proxyquire('../lib/login.js', {'../node_modules/fh-fhc': fhc});
+  // 	login.doLogin('oldUser', 'oldPass', function(response, changed){	
+		// response.username.should.equal('oldUser');
+		// changed.should.equal(false);
+		// done();
   		
-  	});
-  });
+  // 	});
+  // });
 });
