@@ -21,7 +21,6 @@ Module is limited to supporting a subset of FHC commands currently
 ansible-playbook -vvv deployMbaaS.yml
 
 ```yaml
-```
 
 ---
 - hosts: localhost
@@ -87,7 +86,6 @@ ansible-playbook -vvv deployMbaaS.yml
         email: test@redhat.com 
       register: user_details
 
-```
 
 
 ```
