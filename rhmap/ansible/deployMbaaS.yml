@@ -18,7 +18,7 @@
       fhc:
         action: createMBaaSTarget
         mbaasName: "{{ project_name }}"
-        fhMbaasHost: https://"{{ project_name }}"."{{ openshift.hostname }}"
+        fhMbaasHost: https://"{{ project_name }}"-"{{ item.name }}"."{{ openshift.hostname }}"
         url: https://"{{ openshift.hostname }}":"{{ openshift.port }}"
         openshiftUsername: "{{ openshift.username }}"
         openshiftPassword: "{{ openshift.password }}"
