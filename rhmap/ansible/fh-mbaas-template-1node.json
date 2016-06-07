@@ -1,0 +1,1023 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "fh-mbaas",
+    "annotations": {
+      "templateVersion": "0.19.2",
+      "description": "Red Hat Mobile Backend as a Service template",
+      "iconClass": "icon-nodejs"
+    }
+  },
+  "objects": [
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "fh-mbaas-service",
+        "labels": {
+          "name": "fh-mbaas-service"
+        }
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "fh-mbaas-service-ports",
+            "protocol": "TCP",
+            "port": 8080,
+            "targetPort": 8080,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "fh-mbaas"
+        },
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "fh-messaging-service",
+        "labels": {
+          "name": "fh-messaging-service"
+        }
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "fh-messaging-service-ports",
+            "protocol": "TCP",
+            "port": 8080,
+            "targetPort": 8080,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "fh-messaging"
+        },
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "fh-metrics-service",
+        "labels": {
+          "name": "fh-metrics-service"
+        }
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "fh-metrics-service-ports",
+            "protocol": "TCP",
+            "port": 8080,
+            "targetPort": 8080,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "fh-metrics"
+        },
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "fh-statsd-service",
+        "labels": {
+          "name": "fh-statsd-service"
+        }
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "tcp",
+            "protocol": "TCP",
+            "port": 8080,
+            "targetPort": 8080
+          },
+          {
+            "name": "udp",
+            "protocol": "UDP",
+            "port": 8081,
+            "targetPort": 8081
+          }
+        ],
+        "selector": {
+          "name": "fh-statsd"
+        },
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "mongodb-service",
+        "labels": {
+          "name": "mongodb-service"
+        }
+      },
+      "spec": {
+        "ports": [
+          {
+            "protocol": "TCP",
+            "port": 27017,
+            "targetPort": 27017,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "mongodb-replica"
+        },
+        "portalIP": "None",
+        "clusterIP": "None",
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "fh-mbaas",
+        "labels": {
+          "name": "fh-mbaas"
+        }
+      },
+      "spec": {
+        "strategy": {
+          "type": "Rolling",
+          "rollingParams": {
+            "updatePeriodSeconds": 1,
+            "intervalSeconds": 1,
+            "timeoutSeconds": 300
+          },
+          "resources": {
+            "limits": {
+              "cpu": "800m",
+              "memory": "800Mi"
+            },
+            "requests": {
+              "cpu": "200m",
+              "memory": "200Mi"
+            }
+          }
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "fh-mbaas"
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "name": "fh-mbaas"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "fh-mbaas",
+                "image": "${FH_MBAAS_IMAGE}:${FH_MBAAS_IMAGE_VERSION}",
+                "ports": [
+                  {
+                    "containerPort": 8080,
+                    "protocol": "TCP"
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "FH_CLUSTER",
+                    "value": "${FH_CLUSTER}"
+                  },
+                  {
+                    "name": "FH_MBAASID",
+                    "value": "${FH_MBAASID}"
+                  },
+                  {
+                    "name": "MONGODB_FHMBAAS_USER",
+                    "value": "${MONGODB_FHMBAAS_USER}"
+                  },
+                  {
+                    "name": "MONGODB_FHMBAAS_PASSWORD",
+                    "value": "${MONGODB_FHMBAAS_PASSWORD}"
+                  },
+                  {
+                    "name": "MONGODB_FHMBAAS_DATABASE",
+                    "value": "fh-mbaas"
+                  },
+                  {
+                    "name": "FHMBAAS_KEY",
+                    "value": "${FHMBAAS_KEY}"
+                  },
+                  {
+                    "name": "MONGODB_ADMIN_PASSWORD",
+                    "value": "${MONGODB_ADMIN_PASSWORD}"
+                  },
+                  {
+                    "name": "FH_METRICS_API_KEY",
+                    "description": "API Key for calling fh-metrics",
+                    "value": "${FH_METRICS_API_KEY}"
+                  },
+                  {
+                    "name": "FH_MESSAGING_API_KEY",
+                    "description": "API Key for calling fh-messaging",
+                    "value": "${FH_MESSAGING_API_KEY}"
+                  },
+                  {
+                    "name": "FH_STATSD_API_KEY",
+                    "description": "API Key for calling fh-statsd",
+                    "value": "${FH_STATSD_API_KEY}"
+                  },
+                  {
+                    "name": "FH_LOG_LEVEL",
+                    "value": "${FH_DEFAULT_LOG_LEVEL}"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "800m",
+                    "memory": "800Mi"
+                  },
+                  "requests": {
+                    "cpu": "200m",
+                    "memory": "200Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "capabilities": {},
+                  "privileged": false
+                }
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"
+          }
+        }
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "fh-messaging",
+        "labels": {
+          "name": "fh-messaging"
+        }
+      },
+      "spec": {
+        "strategy": {
+          "type": "Rolling",
+          "rollingParams": {
+            "updatePeriodSeconds": 1,
+            "intervalSeconds": 1,
+            "timeoutSeconds": 300
+          },
+          "resources": {
+            "limits": {
+              "cpu": "400m",
+              "memory": "400Mi"
+            },
+            "requests": {
+              "cpu": "200m",
+              "memory": "200Mi"
+            }
+          }
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "fh-messaging"
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "name": "fh-messaging"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "fh-messaging",
+                "image": "${FH_MESSAGING_IMAGE}:${FH_MESSAGING_IMAGE_VERSION}",
+                "ports": [
+                  {
+                    "containerPort": 8080,
+                    "protocol": "TCP"
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "FH_MESSAGING_CRON",
+                    "value": "10 0 * * *"
+                  },
+                  {
+                    "name": "FH_MBAASID",
+                    "value": "${FH_MBAASID}"
+                  },
+                  {
+                    "name": "MONGODB_FHMETRICS_USER",
+                    "value": "${MONGODB_FHMETRICS_USER}"
+                  },
+                  {
+                    "name": "MONGODB_FHMETRICS_PASSWORD",
+                    "value": "${MONGODB_FHMETRICS_PASSWORD}"
+                  },
+                  {
+                    "name": "MONGODB_FHMETRICS_DATABASE",
+                    "value": "fh-metrics"
+                  },
+                  {
+                    "name": "MONGODB_FHREPORTING_USER",
+                    "value": "${MONGODB_FHREPORTING_USER}"
+                  },
+                  {
+                    "name": "MONGODB_FHREPORTING_PASSWORD",
+                    "value": "${MONGODB_FHREPORTING_PASSWORD}"
+                  },
+                  {
+                    "name": "MONGODB_FHREPORTING_DATABASE",
+                    "value": "fh-reporting"
+                  },
+                  {
+                    "name": "FH_MESSAGING_API_KEY",
+                    "description": "API Key for calling fh-messaging",
+                    "value": "${FH_MESSAGING_API_KEY}"
+                  },
+                  {
+                    "name": "FH_LOG_LEVEL",
+                    "value": "${FH_DEFAULT_LOG_LEVEL}"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "400m",
+                    "memory": "400Mi"
+                  },
+                  "requests": {
+                    "cpu": "200m",
+                    "memory": "200Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "capabilities": {},
+                  "privileged": false
+                }
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"
+          }
+        }
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "fh-metrics",
+        "labels": {
+          "name": "fh-metrics"
+        }
+      },
+      "spec": {
+        "strategy": {
+          "type": "Rolling",
+          "rollingParams": {
+            "updatePeriodSeconds": 1,
+            "intervalSeconds": 1,
+            "timeoutSeconds": 300
+          },
+          "resources": {
+            "limits": {
+              "cpu": "400m",
+              "memory": "400Mi"
+            },
+            "requests": {
+              "cpu": "200m",
+              "memory": "200Mi"
+            }
+          }
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "fh-metrics"
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "name": "fh-metrics"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "fh-metrics",
+                "image": "${FH_METRICS_IMAGE}:${FH_METRICS_IMAGE_VERSION}",
+                "ports": [
+                  {
+                    "containerPort": 8080,
+                    "protocol": "TCP"
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "FH_MBAASID",
+                    "value": "${FH_MBAASID}"
+                  },
+                  {
+                    "name": "MONGODB_FHREPORTING_PASSWORD",
+                    "value": "${MONGODB_FHREPORTING_PASSWORD}"
+                  },
+                  {
+                    "name": "MONGODB_FHREPORTING_USER",
+                    "value": "${MONGODB_FHREPORTING_USER}"
+                  },
+                  {
+                    "name": "MONGODB_FHREPORTING_DATABASE",
+                    "value": "fh-reporting"
+                  },
+                  {
+                    "name": "MONGODB_FHMETRICS_USER",
+                    "value": "${MONGODB_FHMETRICS_USER}"
+                  },
+                  {
+                    "name": "MONGODB_FHMETRICS_PASSWORD",
+                    "value": "${MONGODB_FHMETRICS_PASSWORD}"
+                  },
+                  {
+                    "name": "MONGODB_FHMETRICS_DATABASE",
+                    "value": "fh-metrics"
+                  },
+                  {
+                    "name": "FH_METRICS_API_KEY",
+                    "description": "API Key for calling fh-metrics",
+                    "value": "${FH_METRICS_API_KEY}"
+                  },
+                  {
+                    "name": "FH_LOG_LEVEL",
+                    "value": "${FH_DEFAULT_LOG_LEVEL}"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "400m",
+                    "memory": "400Mi"
+                  },
+                  "requests": {
+                    "cpu": "200m",
+                    "memory": "200Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "capabilities": {},
+                  "privileged": false
+                }
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"
+          }
+        }
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "fh-statsd",
+        "labels": {
+          "name": "fh-statsd"
+        }
+      },
+      "spec": {
+        "strategy": {
+          "type": "Rolling",
+          "rollingParams": {
+            "updatePeriodSeconds": 1,
+            "intervalSeconds": 1,
+            "timeoutSeconds": 300
+          },
+          "resources": {
+            "limits": {
+              "cpu": "400m",
+              "memory": "400Mi"
+            },
+            "requests": {
+              "cpu": "200m",
+              "memory": "200Mi"
+            }
+          }
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "fh-statsd"
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "name": "fh-statsd"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "fh-statsd",
+                "image": "${FH_STATSD_IMAGE}:${FH_STATSD_IMAGE_VERSION}",
+                "ports": [
+                  {
+                    "containerPort": 8080,
+                    "protocol": "TCP"
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "FH_STATSD_API_KEY",
+                    "description": "API Key for calling fh-statsd",
+                    "value": "${FH_STATSD_API_KEY}"
+                  },
+                  {
+                    "name": "FH_LOG_LEVEL",
+                    "value": "${FH_DEFAULT_LOG_LEVEL}"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "400m",
+                    "memory": "400Mi"
+                  },
+                  "requests": {
+                    "cpu": "200m",
+                    "memory": "200Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "capabilities": {},
+                  "privileged": false
+                }
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"
+          }
+        }
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "mongodb-1",
+        "labels": {
+          "name": "mongodb"
+        }
+      },
+      "spec": {
+        "strategy": {
+          "type": "Recreate",
+          "resources": {
+            "limits": {
+              "cpu": "1000m",
+              "memory": "1000Mi"
+            },
+            "requests": {
+              "cpu": "200m",
+              "memory": "200Mi"
+            }
+          }
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "mongodb-replica"
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "name": "mongodb-replica"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "mongodb-service",
+                "image": "${MONGODB_IMAGE}:${MONGODB_IMAGE_VERSION}",
+                "ports": [
+                  {
+                    "containerPort": 27017,
+                    "protocol": "TCP"
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "MONGODB_REPLICA_NAME",
+                    "value": "rs0"
+                  },
+                  {
+                    "name": "MONGODB_SERVICE_NAME",
+                    "value": "mongodb-service"
+                  },
+                  {
+                    "name": "MONGODB_KEYFILE_VALUE",
+                    "value": "${MONGODB_KEYFILE_VALUE}"
+                  },
+                  {
+                    "name": "MONGODB_FHMBAAS_USER",
+                    "value": "${MONGODB_FHMBAAS_USER}"
+                  },
+                  {
+                    "name": "MONGODB_FHMBAAS_PASSWORD",
+                    "value": "${MONGODB_FHMBAAS_PASSWORD}"
+                  },
+                  {
+                    "name": "MONGODB_FHMBAAS_DATABASE",
+                    "value": "fh-mbaas"
+                  },
+                  {
+                    "name": "FHMBAAS_KEY",
+                    "value": "${FHMBAAS_KEY}"
+                  },
+                  {
+                    "name": "MONGODB_ADMIN_PASSWORD",
+                    "value": "${MONGODB_ADMIN_PASSWORD}"
+                  },
+                  {
+                    "name": "MONGODB_FHSTATSD_USER",
+                    "value": "${MONGODB_FHSTATSD_USER}"
+                  },
+                  {
+                    "name": "MONGODB_FHSTATSD_PASSWORD",
+                    "value": "${MONGODB_FHSTATSD_PASSWORD}"
+                  },
+                  {
+                    "name": "MONGODB_FHSTATSD_DATABASE",
+                    "value": "fh-statsd"
+                  },
+                  {
+                    "name": "MONGODB_FHMETRICS_USER",
+                    "value": "${MONGODB_FHMETRICS_USER}"
+                  },
+                  {
+                    "name": "MONGODB_FHMETRICS_PASSWORD",
+                    "value": "${MONGODB_FHMETRICS_PASSWORD}"
+                  },
+                  {
+                    "name": "MONGODB_FHMETRICS_DATABASE",
+                    "value": "fh-metrics"
+                  },
+                  {
+                    "name": "MONGODB_FHREPORTING_USER",
+                    "value": "${MONGODB_FHREPORTING_USER}"
+                  },
+                  {
+                    "name": "MONGODB_FHREPORTING_PASSWORD",
+                    "value": "${MONGODB_FHREPORTING_PASSWORD}"
+                  },
+                  {
+                    "name": "MONGODB_FHREPORTING_DATABASE",
+                    "value": "fh-reporting"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "1000Mi"
+                  },
+                  "requests": {
+                    "cpu": "200m",
+                    "memory": "200Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent"
+              }
+            ],
+            "restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"
+          }
+        }
+      }
+    },
+    {
+      "kind": "Pod",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "mongodb-initiator",
+        "labels": {
+          "name": "mongodb-initiator"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "mongodb",
+            "image": "${MONGODB_IMAGE}:${MONGODB_IMAGE_VERSION}",
+            "ports": [
+              {
+                "containerPort": 27017,
+                "protocol": "TCP"
+              }
+            ],
+            "command": [
+              "run-mongod.sh",
+              "initiate"
+            ],
+            "env": [
+              {
+                "name": "MONGODB_REPLICA_NAME",
+                "value": "rs0"
+              },
+              {
+                "name": "MONGODB_SERVICE_NAME",
+                "value": "mongodb-service"
+              },
+              {
+                "name": "MONGODB_KEYFILE_VALUE",
+                "value": "${MONGODB_KEYFILE_VALUE}"
+              },
+              {
+                "name": "MONGODB_FHMBAAS_USER",
+                "value": "${MONGODB_FHMBAAS_USER}"
+              },
+              {
+                "name": "MONGODB_FHMBAAS_PASSWORD",
+                "value": "${MONGODB_FHMBAAS_PASSWORD}"
+              },
+              {
+                "name": "MONGODB_FHMBAAS_DATABASE",
+                "value": "fh-mbaas"
+              },
+              {
+                "name": "FHMBAAS_KEY",
+                "value": "${FHMBAAS_KEY}"
+              },
+              {
+                "name": "MONGODB_ADMIN_PASSWORD",
+                "value": "${MONGODB_ADMIN_PASSWORD}"
+              },
+              {
+                "name": "MONGODB_FHMETRICS_USER",
+                "value": "${MONGODB_FHMETRICS_USER}"
+              },
+              {
+                "name": "MONGODB_FHMETRICS_PASSWORD",
+                "value": "${MONGODB_FHMETRICS_PASSWORD}"
+              },
+              {
+                "name": "MONGODB_FHMETRICS_DATABASE",
+                "value": "fh-metrics"
+              },
+              {
+                "name": "MONGODB_FHREPORTING_USER",
+                "value": "${MONGODB_FHREPORTING_USER}"
+              },
+              {
+                "name": "MONGODB_FHREPORTING_PASSWORD",
+                "value": "${MONGODB_FHREPORTING_PASSWORD}"
+              },
+              {
+                "name": "MONGODB_FHREPORTING_DATABASE",
+                "value": "fh-reporting"
+              },
+              {
+                "name": "ENDPOINT_COUNT",
+                "value": "${ENDPOINT_COUNT}"
+              },
+              {
+                "name": "MONGODB_INITIAL_REPLICA_COUNT",
+                "value": "${ENDPOINT_COUNT}"
+              }
+            ],
+            "terminationMessagePath": "/dev/termination-log",
+            "imagePullPolicy": "IfNotPresent"
+          }
+        ],
+        "restartPolicy": "Never",
+        "dnsPolicy": "ClusterFirst"
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "mbaas",
+        "annotations": {
+          "openshift.io/host.generated": "false"
+        }
+      },
+      "spec": {
+        "host": "${MBAAS_ROUTER_DNS}",
+        "to": {
+          "kind": "Service",
+          "name": "fh-mbaas-service"
+        },
+        "tls": {
+          "termination": "edge",
+          "insecureEdgeTerminationPolicy": "Allow"
+        }
+      }
+    }
+  ],
+  "parameters": [
+    {
+      "name": "FH_CLUSTER",
+      "value": "development",
+      "description": "the name of the cluster the mbaas was created from"
+    },
+    {
+      "name": "FH_MBAASID",
+      "value": "default",
+      "description": "id of the mbaas. A value chosen by the user"
+    },
+    {
+      "name": "MONGODB_FHMBAAS_USER",
+      "value": "u-mbaas",
+      "description": "The MongoDB user name"
+    },
+    {
+      "name": "MONGODB_FHMBAAS_PASSWORD",
+      "description": "The MongoDB password",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "FHMBAAS_KEY",
+      "description": "The MBaaS key",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "MONGODB_KEYFILE_VALUE",
+      "description": "The value of the MongoDB Key",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{255}"
+    },
+    {
+      "name": "MONGODB_ADMIN_PASSWORD",
+      "description": "The MongoDB Admin password",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "MONGODB_FHREPORTING_USER",
+      "value": "u-reporting",
+      "description": "The Reporting user name"
+    },
+    {
+      "name": "MONGODB_FHREPORTING_PASSWORD",
+      "description": "The MongoDB Reporting password",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "MONGODB_FHMETRICS_USER",
+      "value": "u-metrics",
+      "description": "The Metrics user name"
+    },
+    {
+      "name": "MONGODB_FHMETRICS_PASSWORD",
+      "description": "The MongoDB Metrics password",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "FH_MBAAS_IMAGE",
+      "value": "docker.io/rhmap/fh-mbaas",
+      "description": "The name of the fh-mbaas image"
+    },
+    {
+      "name": "FH_MBAAS_IMAGE_VERSION",
+      "value": "3.7.1-814",
+      "description": "The version for the FH_MBAAS_IMAGE"
+    },
+    {
+      "name": "FH_MESSAGING_IMAGE",
+      "value": "docker.io/rhmap/fh-messaging",
+      "description": "The name of the fh-messaging image"
+    },
+    {
+      "name": "FH_MESSAGING_IMAGE_VERSION",
+      "value": "1.3.0-328",
+      "description": "The version for the FH_MESSAGING_IMAGE"
+    },
+    {
+      "name": "FH_METRICS_IMAGE",
+      "value": "docker.io/rhmap/fh-metrics",
+      "description": "The name of the fh-metrics image"
+    },
+    {
+      "name": "FH_METRICS_IMAGE_VERSION",
+      "value": "1.2.1-329",
+      "description": "The version for the FH_METRICS_IMAGE"
+    },
+    {
+      "name": "FH_STATSD_IMAGE",
+      "value": "docker.io/rhmap/fh-statsd",
+      "description": "The name of the fh-statsd image"
+    },
+    {
+      "name": "FH_STATSD_IMAGE_VERSION",
+      "value": "1.3.0-80",
+      "description": "The version for the FH_STATSD_IMAGE"
+    },
+    {
+      "name": "MONGODB_IMAGE",
+      "value": "docker.io/rhmap/mongodb",
+      "description": "The name of the mongodb image"
+    },
+    {
+      "name": "MONGODB_IMAGE_VERSION",
+      "value": "2.4-12",
+      "description": "The version for the MONGODB_IMAGE"
+    },
+    {
+      "name": "FH_MESSAGING_API_KEY",
+      "description": "Key for communicating with the FH_MESSAGING Service",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "FH_METRICS_API_KEY",
+      "description": "Key for communicating with the FH_METRICS Service",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "MBAAS_ROUTER_DNS",
+      "description": "The DNS name for the MBaaS Router",
+      "value": "mbaas.example.com"
+    },
+    {
+      "name": "ENDPOINT_COUNT",
+      "description": "The amount of database's to create a replica set",
+      "value": "1"
+    },
+    {
+      "name": "FH_MBAAS_REPLICAS",
+      "description": "Replica used for sizing",
+      "value": "1"
+    },
+    {
+      "name": "FH_MESSAGING_REPLICAS",
+      "description": "Replica used for sizing",
+      "value": "1"
+    },
+    {
+      "name": "FH_METRICS_REPLICAS",
+      "description": "Replica used for sizing",
+      "value": "1"
+    },
+    {
+      "name": "FH_STATSD_API_KEY",
+      "description": "Key for communicating with the FH_STATSD Service",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "FH_DEFAULT_LOG_LEVEL",
+      "description": "A default log level for all MBaaS components",
+      "value": "info"
+    }
+  ]
+}
