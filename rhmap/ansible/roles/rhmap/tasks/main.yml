@@ -42,12 +42,25 @@
     fhc:
       action: createTeam
       mbaasName: "{{ project_name }}"
+      type: "{{ item.type }}"
+      name: "{{ item.name }}"
       projectGuid: "{{ project_details.response.guid }}"
-      environments: "{{ deployedenvironments.results | map(attribute='id')|join(',') }}"
-      mbaases: "{{ deployedmbaases.results | map(attribute='id')|join(',') }}"
-  - name: Create User
+      environment_permissions: "{{ item.environments  | map(attribute='name')|join(',') }}"
+    with_items: 
+      "{{ teams }}"
+  - name: Create RHMAP Users
     fhc:
       action: createUser
-      username: test@redhat.com
-      email: test@redhat.com 
+      username: "{{ item.username }}"
+      email: "{{ item.email }}" 
     register: user_details
+    with_items: 
+      "{{ rhmap.users }}"
+  - name: Add RHMAP Users to Teams
+    fhc:
+      action: addUserToTeam
+      mbaasName: "{{ project_name }}"
+      username: "{{ item.username }}"
+      teamName: "{{ item.team }}" 
+    with_items: 
+      "{{ rhmap.users }}"
