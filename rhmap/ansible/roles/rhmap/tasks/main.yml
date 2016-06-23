@@ -21,8 +21,6 @@
     register: deployedmbaases
     with_items: 
       "{{ environments }}"
-  - debug: 
-      var: deployedmbaases
   - name: Create Environment
     fhc:
       action: createEnvironment
@@ -36,8 +34,6 @@
       action: createProject
       projectName: "{{ project_name }}" 
     register: project_details
-  - debug: 
-      var: project_details
   - name: Create teams
     fhc:
       action: createTeam
