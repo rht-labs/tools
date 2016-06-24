@@ -18,4 +18,4 @@
 - name: update jenkins config.xml
   template: src=config.xml dest=./config-live.xml
 - name: create jenkins job
-  command: 'curl -u admin:admin http://127.0.0.1:8080/createItem?name="{{ project_name }}" -X POST -d "@config-live.xml" -H "Content-Type: application/xml"'
+  command: 'curl -u "{{ jenkins.username }}":"{{ jenkins.password }}"  "{{ jenkins.url }}"/createItem?name="{{ project_name }}" -X POST -d "@config-live.xml" -H "Content-Type: application/xml"'
