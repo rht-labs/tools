@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.3">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.6">
+    <script>// CD pipeline for JenkinsCI&#10;
+&#10;
+node {&#10;
+   // Get code from this GitHub repository&#10;
+   stage &apos;Code Checkout&apos;&#10;
+&#10;
+   checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;git-user-credentials&apos;, url: &apos;https://github.com/feedhenry-staff/rhmap-ci-pipeline-setup.git&apos;]]])&#10;
+&#10;
+   // Install npm dependencies&#10;
+   stage &apos;Install Dependencies&apos;&#10;
+   sh &apos;npm install&apos;&#10;
+&#10;
+&#10;
+}&#10;</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+</flow-definition>
