@@ -1,0 +1,25 @@
+---
+- project_name: nylabpresentation
+- environments:
+  - { name: 'development' }
+  - { name: 'test' }
+  - { name: 'production' }
+- teams:
+  - { type: 'developer', name: 'developer', environments: [{ name: 'development' }, { name: 'test' }] }
+  - { type: 'operations', name: 'operations', environments: []}
+  - { type: 'business', name: 'business', environments: [{ name: 'development' },{ name: 'test' }, { name: 'production' }]}
+- rhmap:
+    domain: https://innovation.us.labs.redhatmobile.com/ 
+    username: phayes@redhat.com
+    password: P0stf1x01
+    users:
+      - { team: 'developer', username: 'dev@example.com', email: 'dev@example.com' }
+      - { team: 'developer', username: 'dev2@example.com', email: 'dev2@example.com' }
+      - { team: 'operations', username: 'ops@example.com', email: 'ops@example.com' }
+      - { team: 'business', username: 'bus@example.com', email: 'bus@example.com' }
+- openshift:
+    hostname: osm1-master1.feedhenry.net
+    port: 8443
+    username: test
+    password: 'Red Hat Mobile test account 1.'
+    wildcard_dns: '*.apps.osm1.feedhenry.net'
