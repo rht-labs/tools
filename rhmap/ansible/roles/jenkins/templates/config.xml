@@ -23,6 +23,24 @@ node {&#10;
    sh &apos;/usr/local/bin/npm test&apos;&#10;
 &#10;
 &#10;
+   // Configure FHC&#10;
+   stage &apos;Configure fhc&apos;&#10;
+   sh &apos;fhc target {{ rhmap.domain }}&apos;&#10;
+   sh &apos;fhc login {{ rhmap.username }} {{ rhmap.password }}&apos;&#10;
+   sh &apos;fhc fhcfg set fhversion 3&apos;&#10;
+   sh &apos;fhc fhcfg set version 3&apos;&#10;
+&#10;
+&#10;
+   // Trigger cloud git pull&#10;
+   stage &apos;Trigger cloud git pull&apos;&#10;
+   sh &apos;/usr/local/bin/fhc git pull {{ cloud_app_guid.response.guid }}&apos;&#10;
+&#10;
+&#10;
+   // Trigger opp stage&#10;
+   stage &apos;Trigger cloud app stage&apos;&#10;
+   sh &apos;/usr/local/bin/fhc app stage --app={{ cloud_app_guid.response.guid }} --env={{ project_name }}-development&apos;&#10;
+&#10;
+&#10;
 }&#10;</script>
     <sandbox>true</sandbox>
   </definition>

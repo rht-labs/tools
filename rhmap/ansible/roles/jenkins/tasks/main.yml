@@ -15,6 +15,12 @@
     projectName:  "{{ project_name }}"
     appType: cloud_nodejs
   register: cloud_git_url
+- name: Get cloud app guid
+  fhc:
+    action: getAppGuid
+    projectName:  "{{ project_name }}"
+    appType: cloud_nodejs
+  register: cloud_app_guid
 - name: update jenkins config.xml
   template: src=config.xml dest=./config-live.xml
 - name: create jenkins job
