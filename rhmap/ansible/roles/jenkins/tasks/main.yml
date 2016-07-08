@@ -9,19 +9,35 @@
     action: login
     username: "{{ rhmap.username }}"
     password: "{{ rhmap.password }}"
-- name: Get cloud app git url
+- name: Get cloud app details
   fhc:
-    action: getGitUrl
-    projectName:  "{{ project_name }}"
+    action: getAppDetails
+    projectName:  "{{ item.name }}"
     appType: cloud_nodejs
-  register: cloud_git_url
-- name: Get cloud app guid
+  register: appDetails
+  with_items: 
+    "{{ projects }}"
+- name: update jenkins cloud app config.xml
+  template: src=config.xml dest=./config-{{item.item.name}}.xml
+  with_items:
+    "{{ appDetails.results }}"
+- name: create jenkins job for cloud app
+  command: 'curl -u "{{ jenkins.username }}":"{{ jenkins.password }}"  "{{ jenkins.url }}"/createItem?name={{ engagement_name }}-{{ item.name }}-cloud -X POST -d "@config-"{{ item.name }}".xml" -H "Content-Type: application/xml"'
+  with_items: 
+    "{{ projects }}"
+- name: Get client app details
   fhc:
-    action: getAppGuid
-    projectName:  "{{ project_name }}"
-    appType: cloud_nodejs
-  register: cloud_app_guid
-- name: update jenkins config.xml
-  template: src=config.xml dest=./config-live.xml
-- name: create jenkins job
-  command: 'curl -u "{{ jenkins.username }}":"{{ jenkins.password }}"  "{{ jenkins.url }}"/createItem?name="{{ project_name }}" -X POST -d "@config-live.xml" -H "Content-Type: application/xml"'
+    action: getAppDetails
+    projectName:  "{{ item.name }}"
+    appType: client_hybrid
+  register: cliantAppDetails
+  with_items: 
+    "{{ projects }}"
+- name: update jenkins cloud app config.xml
+  template: src=client-config.xml dest=./client-config-{{item.item.name}}.xml
+  with_items:
+    "{{ cliantAppDetails.results }}"
+- name: create jenkins job for cloud app
+  command: 'curl -u "{{ jenkins.username }}":"{{ jenkins.password }}"  "{{ jenkins.url }}"/createItem?name={{ engagement_name }}-{{ item.name }}-client -X POST -d "@client-config-"{{ item.name }}".xml" -H "Content-Type: application/xml"'
+  with_items: 
+    "{{ projects }}"

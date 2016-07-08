@@ -11,37 +11,36 @@
   - name: Create MBaaS Target
     fhc:
       action: createMBaaSTarget
-      mbaasName: "{{ project_name }}"
-      fhMbaasHost: https://"{{ project_name }}"-"{{ item.name }}"."{{ openshift.hostname }}"
+      engagementName: "{{ engagement_name }}"
+      fhMbaasHost: https://"{{ engagement_name }}"-"{{ item.item.name }}"."{{ openshift.dns_name }}"
       url: https://"{{ openshift.hostname }}":"{{ openshift.port }}"
       openshiftUsername: "{{ openshift.username }}"
       openshiftPassword: "{{ openshift.password }}"
       routerDNSUrl: "{{ openshift.wildcard_dns }}"
-      environment: "{{ item.name }}"
-    register: deployedmbaases
+      serviceKey: "{{ item.key }}"
+      environment: "{{ item.item.name }}"
     with_items: 
-      "{{ environments }}"
+      "{{ serviceKeys.results }}"
   - name: Create Environment
     fhc:
       action: createEnvironment
-      mbaasName: "{{ project_name }}"
+      engagementName: "{{ engagement_name }}"
       environment: "{{ item.name }}"
-    register: deployedenvironments
     with_items: 
       "{{ environments }}"
   - name: Create RH MAP Project
     fhc:
       action: createProject
-      projectName: "{{ project_name }}" 
+      projectName: "{{ item.name }}" 
     register: project_details
+    with_items: 
+      "{{ projects }}"
   - name: Create teams
     fhc:
       action: createTeam
-      mbaasName: "{{ project_name }}"
+      engagementName: "{{ engagement_name }}"
       type: "{{ item.type }}"
       name: "{{ item.name }}"
-      projectGuid: "{{ project_details.response.guid }}"
-      environment_permissions: "{{ item.environments  | map(attribute='name')|join(',') }}"
     with_items: 
       "{{ teams }}"
   - name: Create RHMAP Users
@@ -55,8 +54,42 @@
   - name: Add RHMAP Users to Teams
     fhc:
       action: addUserToTeam
-      mbaasName: "{{ project_name }}"
+      engagementName: "{{ engagement_name }}"
       username: "{{ item.username }}"
       teamName: "{{ item.team }}" 
     with_items: 
       "{{ rhmap.users }}"
+  - name: Add Projects to Teams
+    fhc:
+      action: updateTeam
+      updateType: project
+      engagementName: "{{ engagement_name }}"
+      newValue: "{{ item[0].name }}"
+      teamName: "{{ item[1].name }}" 
+    with_nested:
+      - "{{ projects }}"
+      - "{{ teams }}"
+  - name: Add MBaaS Targets to Teams
+    fhc:
+      action: updateTeam
+      updateType: mbaas
+      engagementName: "{{ engagement_name }}"
+      newValue: "{{ item[0].name }}"
+      teamName: "{{ item[1].name }}" 
+      isLive: "{{ item[0].is_live }}"
+      teamType: "{{ item[1].type }}"
+    with_nested:
+      - "{{ environments }}"
+      - "{{ teams }}"
+  - name: Add Environments to Teams
+    fhc:
+      action: updateTeam
+      updateType: environment
+      engagementName: "{{ engagement_name }}"
+      newValue: "{{ item[0].name }}"
+      teamName: "{{ item[1].name }}" 
+      isLive: "{{ item[0].is_live }}"
+      teamType: "{{ item[1].type }}"
+    with_nested:
+      - "{{ environments }}"
+      - "{{ teams }}"

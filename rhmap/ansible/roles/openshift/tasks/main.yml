@@ -1,22 +1,35 @@
 ---
   - name: Login to openshift
     command: oc login "{{ openshift.hostname }}" --insecure-skip-tls-verify=true --username="{{ openshift.username }}" --password="{{ openshift.password }}"
-  - name: test oc module
-    oadm_project:
-      name: "{{ project_name }}"
-      node_selector: type=infra
-      display_name: "{{ project_name }}"
-    register: projectout
-    with_items: 
-       "{{ environments }}"
-  - debug: var=projectout
-  # - name: Create to openshift Projects
-  #   command: oc new-project "{{ project_name }}"-"{{ item.name }}"
+  # - name: test oc module
+  #   oadm_project:
+  #     name: "{{ engagement_name }}"
+  #     node_selector: type=infra
+  #     display_name: "{{ engagement_name }}"
+  #   register: projectout
   #   with_items: 
-  #     "{{ environments }}"
-  - name: Create to openshift Apps
-    command: oc new-app -p MBAAS_ROUTER_DNS="{{ project_name }}"-"{{ item.name }}"."{{ openshift.hostname }}" -n "{{ project_name }}"-"{{ item.name }}" -f /Users/philiphayes/projects/innovationLab/tools/rhmap/ansible/fh-mbaas-template-1node.json
+  #      "{{ environments }}"
+  # - debug: var=projectout
+  - name: Create to openshift Projects
+    command: oc new-project "{{ engagement_name }}"-"{{ item.name }}"
     with_items: 
       "{{ environments }}"
+    ignore_errors: yes
+  - name: Create Service Keys
+    fhc:
+      action: createServiceKey
+      engagementName: "{{ engagement_name }}"
+      environment: "{{ item.name }}"
+    with_items: 
+      "{{ environments }}"
+    register: serviceKeys
+  - debug: var=serviceKeys
+  - name: Create openshift Apps
+    command: oc new-app -p FHMBAAS_KEY="{{ item.key }}" -p MBAAS_ROUTER_DNS="{{ engagement_name }}"-"{{ item.item.name }}"."{{ openshift.dns_name }}" -n "{{ engagement_name }}"-"{{ item.item.name }}" -f /Users/philiphayes/projects/innovationLab/tools/rhmap/ansible/fh-mbaas-template-1node.json
+    register: openshiftApps
+    with_items: 
+      "{{ serviceKeys.results }}"
+    ignore_errors: yes
+ 
 
     

@@ -3,7 +3,8 @@
   vars_files:
     - config.yml
   roles:
-    - rhmap
-    - jenkins
     # - openshift
+    # - rhmap
+    - jenkins
+
 
