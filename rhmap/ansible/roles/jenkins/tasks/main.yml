@@ -33,6 +33,7 @@
   register: cliantAppDetails
   with_items: 
     "{{ projects }}"
+- debug: var=cliantAppDetails
 - name: update jenkins cloud app config.xml
   template: src=client-config.xml dest=./client-config-{{item.item.name}}.xml
   with_items:
