@@ -27,6 +27,7 @@ node {&#10;
    sh &apos;/usr/local/bin/fhc git pull {{ item.response.guid }}&apos;&#10;
    
    stage &apos;Build debug android binary&apos;&#10;
+   input 'Build binary?'&#10;
    sh &apos;fhc build project={{ item.response.projectGuid }}  app={{ item.response.guid }} cloud_app={{ item.response.cloudAppGuid }} destination=android download=false config=debug tag=0.0.3&apos;
 }&#10;</script>
     <sandbox>true</sandbox>
