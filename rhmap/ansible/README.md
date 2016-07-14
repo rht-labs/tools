@@ -62,6 +62,7 @@ Uses config.yml file e.g.
 ---
 
   # tasks file for RHMAP
+  ---
   - name: Set RH MAP Target
     fhc:
       action: target
@@ -71,39 +72,91 @@ Uses config.yml file e.g.
       action: login
       username: "{{ rhmap.username }}"
       password: "{{ rhmap.password }}"
-  - name: Get cloud app details
+  - name: Create MBaaS Target
     fhc:
-      action: getAppDetails
-      projectName:  "{{ item.name }}"
-      appType: cloud_nodejs
-    register: appDetails
+      action: createMBaaSTarget
+      engagementName: "{{ engagement_name }}"
+      fhMbaasHost: https://"{{ engagement_name }}"-"{{ item.item.name }}"."{{ openshift.dns_name }}"
+      url: https://"{{ openshift.hostname }}":"{{ openshift.port }}"
+      openshiftUsername: "{{ openshift.username }}"
+      openshiftPassword: "{{ openshift.password }}"
+      routerDNSUrl: "{{ openshift.wildcard_dns }}"
+      serviceKey: "{{ item.key }}"
+      environment: "{{ item.item.name }}"
     with_items: 
-      "{{ projects }}"
-  - name: update jenkins cloud app config.xml
-    template: src=config.xml dest=./config-{{item.item.name}}.xml
-    with_items:
-      "{{ appDetails.results }}"
-  - name: create jenkins job for cloud app
-    command: 'curl -u "{{ jenkins.username }}":"{{ jenkins.password }}"  "{{ jenkins.url }}"/createItem?name={{ engagement_name }}-{{ item.name }}-cloud -X POST -d "@config-"{{ item.name }}".xml" -H "Content-Type: application/xml"'
-    with_items: 
-      "{{ projects }}"
-  - name: Get client app details
+      "{{ serviceKeys.results }}"
+  - name: Create Environment
     fhc:
-      action: getAppDetails
-      projectName:  "{{ item.name }}"
-      appType: client_hybrid
-    register: cliantAppDetails
+      action: createEnvironment
+      engagementName: "{{ engagement_name }}"
+      environment: "{{ item.name }}"
+    with_items: 
+      "{{ environments }}"
+  - name: Create RH MAP Project
+    fhc:
+      action: createProject
+      projectName: "{{ item.name }}" 
+    register: project_details
     with_items: 
       "{{ projects }}"
-  - debug: var=cliantAppDetails
-  - name: update jenkins cloud app config.xml
-    template: src=client-config.xml dest=./client-config-{{item.item.name}}.xml
-    with_items:
-      "{{ cliantAppDetails.results }}"
-  - name: create jenkins job for cloud app
-    command: 'curl -u "{{ jenkins.username }}":"{{ jenkins.password }}"  "{{ jenkins.url }}"/createItem?name={{ engagement_name }}-{{ item.name }}-client -X POST -d "@client-config-"{{ item.name }}".xml" -H "Content-Type: application/xml"'
+  - name: Create teams
+    fhc:
+      action: createTeam
+      engagementName: "{{ engagement_name }}"
+      type: "{{ item.type }}"
+      name: "{{ item.name }}"
     with_items: 
-      "{{ projects }}"
+      "{{ teams }}"
+  - name: Create RHMAP Users
+    fhc:
+      action: createUser
+      username: "{{ item.username }}"
+      email: "{{ item.email }}" 
+    register: user_details
+    with_items: 
+      "{{ rhmap.users }}"
+  - name: Add RHMAP Users to Teams
+    fhc:
+      action: addUserToTeam
+      engagementName: "{{ engagement_name }}"
+      username: "{{ item.username }}"
+      teamName: "{{ item.team }}" 
+    with_items: 
+      "{{ rhmap.users }}"
+  - name: Add Projects to Teams
+    fhc:
+      action: updateTeam
+      updateType: project
+      engagementName: "{{ engagement_name }}"
+      newValue: "{{ item[0].name }}"
+      teamName: "{{ item[1].name }}" 
+    with_nested:
+      - "{{ projects }}"
+      - "{{ teams }}"
+  - name: Add MBaaS Targets to Teams
+    fhc:
+      action: updateTeam
+      updateType: mbaas
+      engagementName: "{{ engagement_name }}"
+      newValue: "{{ item[0].name }}"
+      teamName: "{{ item[1].name }}" 
+      isLive: "{{ item[0].is_live }}"
+      teamType: "{{ item[1].type }}"
+    with_nested:
+      - "{{ environments }}"
+      - "{{ teams }}"
+  - name: Add Environments to Teams
+    fhc:
+      action: updateTeam
+      updateType: environment
+      engagementName: "{{ engagement_name }}"
+      newValue: "{{ item[0].name }}"
+      teamName: "{{ item[1].name }}" 
+      isLive: "{{ item[0].is_live }}"
+      teamType: "{{ item[1].type }}"
+    with_nested:
+      - "{{ environments }}"
+      - "{{ teams }}"
 
   ```
 
