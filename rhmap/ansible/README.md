@@ -60,68 +60,52 @@ Uses config.yml file e.g.
 ```yaml
 
 ---
-- hosts: localhost
-  vars_files:
-    - config.yml
-  tasks:
-    - name: Set RH MAP Target
-      fhc:
-        action: target
-        target: "{{ rhmap.domain }}"
-    - name: Login to RH MAP
-      fhc:
-        action: login
-        username: "{{ rhmap.username }}"
-        password: "{{ rhmap.password }}"
-    - name: Create MBaaS Target
-      fhc:
-        action: createMBaaSTarget
-        mbaasName: "{{ project_name }}"
-        fhMbaasHost: https://"{{ project_name }}"."{{ openshift.hostname }}"
-        url: https://"{{ openshift.hostname }}":"{{ openshift.port }}"
-        openshiftUsername: "{{ openshift.username }}"
-        openshiftPassword: "{{ openshift.password }}"
-        routerDNSUrl: "{{ openshift.wildcard_dns }}"
-        environment: "{{ item.name }}"
-      register: deployedmbaases
-      with_items: 
-        "{{ environments }}"
-    - debug: 
-        var: deployedmbaases
-    - name: Create Environment
-      fhc:
-        action: createEnvironment
-        mbaasName: "{{ project_name }}"
-        environment: "{{ item.name }}"
-      register: deployedenvironments
-      with_items: 
-        "{{ environments }}"
-    - name: Create Project
-      fhc:
-        action: createProject
-        projectName: "{{ project_name }}" 
-      register: project_details
-    - debug: 
-        var: project_details
-    - name: Create teams
-      fhc:
-        action: createTeam
-        mbaasName: "{{ project_name }}"
-        projectGuid: "{{ project_details.response.guid }}"
-        environments: "{{ deployedenvironments.results | map(attribute='id')|join(',') }}"
-        mbaases: "{{ deployedmbaases.results | map(attribute='id')|join(',') }}"
-    - name: Create User
-      fhc:
-        action: createUser
-        username: test@redhat.com
-        email: test@redhat.com 
-      register: user_details
 
+  # tasks file for RHMAP
+  - name: Set RH MAP Target
+    fhc:
+      action: target
+      target: "{{ rhmap.domain }}"
+  - name: Login to RH MAP
+    fhc:
+      action: login
+      username: "{{ rhmap.username }}"
+      password: "{{ rhmap.password }}"
+  - name: Get cloud app details
+    fhc:
+      action: getAppDetails
+      projectName:  "{{ item.name }}"
+      appType: cloud_nodejs
+    register: appDetails
+    with_items: 
+      "{{ projects }}"
+  - name: update jenkins cloud app config.xml
+    template: src=config.xml dest=./config-{{item.item.name}}.xml
+    with_items:
+      "{{ appDetails.results }}"
+  - name: create jenkins job for cloud app
+    command: 'curl -u "{{ jenkins.username }}":"{{ jenkins.password }}"  "{{ jenkins.url }}"/createItem?name={{ engagement_name }}-{{ item.name }}-cloud -X POST -d "@config-"{{ item.name }}".xml" -H "Content-Type: application/xml"'
+    with_items: 
+      "{{ projects }}"
+  - name: Get client app details
+    fhc:
+      action: getAppDetails
+      projectName:  "{{ item.name }}"
+      appType: client_hybrid
+    register: cliantAppDetails
+    with_items: 
+      "{{ projects }}"
+  - debug: var=cliantAppDetails
+  - name: update jenkins cloud app config.xml
+    template: src=client-config.xml dest=./client-config-{{item.item.name}}.xml
+    with_items:
+      "{{ cliantAppDetails.results }}"
+  - name: create jenkins job for cloud app
+    command: 'curl -u "{{ jenkins.username }}":"{{ jenkins.password }}"  "{{ jenkins.url }}"/createItem?name={{ engagement_name }}-{{ item.name }}-client -X POST -d "@client-config-"{{ item.name }}".xml" -H "Content-Type: application/xml"'
+    with_items: 
+      "{{ projects }}"
 
-
-
-
-```
+  ```
 
 ###Via direct call
 From the library folder
