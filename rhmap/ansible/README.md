@@ -24,25 +24,38 @@ ansible-playbook -vvv deployMbaaS.yml
 
 Uses config.yml file e.g.
 ---
-- project_name: test-project
+- engagement_name: samplecompany
+- projects: 
+  - {name: 'project3' }
+  - {name: 'project4' }
 - environments:
-  - { name: 'development' }
-  - { name: 'test' }
-  - { name: 'production' }
+  - { name: 'development', is_live: 0 }
+  - { name: 'production', is_live: 1 }
 - teams:
   - { type: 'developer', name: 'developer' }
   - { type: 'operations', name: 'operations'}
   - { type: 'business', name: 'business'}
+  - { type: 'business', name: 'tester'}
 - rhmap:
-    domain: http://xxxxx.com/ 
-    username: xxxx@example.com
-    password: pass
+    domain: https://xxxxxx.redhatmobile.com/ 
+    username: xxxxxx
+    password: xxxxxx
+    users:
+      - { team: 'developer', username: 'dev@example.com', email: 'dev@example.com' }
+      - { team: 'developer', username: 'dev2@example.com', email: 'dev2@example.com' }
+      - { team: 'operations', username: 'ops@example.com', email: 'ops@example.com' }
+      - { team: 'business', username: 'bus@example.com', email: 'bus@example.com' }
 - openshift:
-    hostname: xxxxx.xx.net
+    hostname: xxxxx.feedhenry.net
+    dns_name: xxxxxx.feedhenry.net
     port: 8443
-    username: test
-    password: 'password'
-    wildcard_dns: '*.apps.xxxxx.net'
+    username: xxxxx
+    password: 'xxxxxxx'
+    wildcard_dns: '*.xxxxx.feedhenry.net'
+- jenkins:
+    url: http://127.0.0.1:8080
+    username: admin
+    password: admin
 
 ```yaml
 
