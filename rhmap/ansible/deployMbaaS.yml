@@ -4,7 +4,7 @@
     - config.yml
   roles:
     - openshift
-    - rhmap
-    - jenkins
+    # - rhmap
+    # - jenkins
 
 

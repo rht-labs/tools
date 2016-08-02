@@ -1,13 +1,18 @@
 ---
-- project_name: nylabpresentation
+- engagement_name: samplecompany
+- projects: 
+  - {name: 'project3' }
+  - {name: 'project4' }
+  # - {name: 'project5' }
 - environments:
-  - { name: 'development' }
-  - { name: 'test' }
-  - { name: 'production' }
+  - { name: 'development', is_live: 0 }
+  # - { name: 'test', is_live: 0 }
+  - { name: 'production', is_live: 1 }
 - teams:
-  - { type: 'developer', name: 'developer', environments: [{ name: 'development' }, { name: 'test' }] }
-  - { type: 'operations', name: 'operations', environments: []}
-  - { type: 'business', name: 'business', environments: [{ name: 'development' },{ name: 'test' }, { name: 'production' }]}
+  - { type: 'developer', name: 'developer' }
+  - { type: 'operations', name: 'operations'}
+  - { type: 'business', name: 'business'}
+  - { type: 'business', name: 'tester'}
 - rhmap:
     domain: https://innovation.us.labs.redhatmobile.com/ 
     username: phayes@redhat.com
@@ -19,7 +24,12 @@
       - { team: 'business', username: 'bus@example.com', email: 'bus@example.com' }
 - openshift:
     hostname: osm1-master1.feedhenry.net
+    dns_name: apps.osm1.feedhenry.net
     port: 8443
     username: test
     password: 'Red Hat Mobile test account 1.'
     wildcard_dns: '*.apps.osm1.feedhenry.net'
+- jenkins:
+    url: http://127.0.0.1:8080
+    username: admin
+    password: admin
