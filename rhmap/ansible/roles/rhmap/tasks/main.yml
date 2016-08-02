@@ -19,6 +19,7 @@
       routerDNSUrl: "{{ openshift.wildcard_dns }}"
       serviceKey: "{{ item.key }}"
       environment: "{{ item.item.name }}"
+    when: item.item.rc == 1
     with_items: 
       "{{ serviceKeys.results }}"
   - name: Create Environment
