@@ -27,7 +27,7 @@
     register: serviceKeys
   - debug: var=serviceKeys
   - name: Create openshift Apps
-    command: oc new-app -p FHMBAAS_KEY="{{ item.key }}" -p MBAAS_ROUTER_DNS="{{ engagement_name }}"-"{{ item.item.item.name }}"."{{ openshift.dns_name }}" -n "{{ engagement_name }}"-"{{ item.item.item.name }}" -f /Users/philiphayes/projects/innovationLab/tools/rhmap/ansible/fh-mbaas-template-1node.json
+    command: oc new-app -p FHMBAAS_KEY="{{ item.key }}" -p MBAAS_ROUTER_DNS="{{ engagement_name }}"-"{{ item.item.item.name }}"."{{ openshift.dns_name }}" -n "{{ engagement_name }}"-"{{ item.item.item.name }}" -f fh-mbaas-template-1node.json
     register: openshiftApps
     when: item.item.rc == 1
     with_items: 
