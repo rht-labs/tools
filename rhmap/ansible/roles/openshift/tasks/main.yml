@@ -1,35 +1,37 @@
 ---
   - name: Login to openshift
     command: oc login "{{ openshift.hostname }}" --insecure-skip-tls-verify=true --username="{{ openshift.username }}" --password="{{ openshift.password }}"
-  # - name: test oc module
-  #   oadm_project:
-  #     name: "{{ engagement_name }}"
-  #     node_selector: type=infra
-  #     display_name: "{{ engagement_name }}"
-  #   register: projectout
-  #   with_items: 
-  #      "{{ environments }}"
-  # - debug: var=projectout
-  - name: Create to openshift Projects
-    command: oc new-project "{{ engagement_name }}"-"{{ item.name }}"
+  - name: Determine if projects exist
+    command: oc get projects "{{ engagement_name }}"-"{{ item.name }}" -o json
     with_items: 
       "{{ environments }}"
-    ignore_errors: yes
+    failed_when: false
+    changed_when: false
+    register: project_test
+  - debug: var=project_test
+  - name: Create projects
+    command: >
+      oc
+      new-project "{{ engagement_name }}"-"{{ item.item.name }}"
+    when: item.rc == 1
+    with_items:
+    - "{{ project_test.results }}"
   - name: Create Service Keys
     fhc:
       action: createServiceKey
       engagementName: "{{ engagement_name }}"
-      environment: "{{ item.name }}"
-    with_items: 
-      "{{ environments }}"
+      environment: "{{ item.item.name }}"
+    when: item.rc == 1
+    with_items:
+    - "{{ project_test.results }}"
     register: serviceKeys
   - debug: var=serviceKeys
   - name: Create openshift Apps
-    command: oc new-app -p FHMBAAS_KEY="{{ item.key }}" -p MBAAS_ROUTER_DNS="{{ engagement_name }}"-"{{ item.item.name }}"."{{ openshift.dns_name }}" -n "{{ engagement_name }}"-"{{ item.item.name }}" -f /Users/philiphayes/projects/innovationLab/tools/rhmap/ansible/fh-mbaas-template-1node.json
+    command: oc new-app -p FHMBAAS_KEY="{{ item.key }}" -p MBAAS_ROUTER_DNS="{{ engagement_name }}"-"{{ item.item.item.name }}"."{{ openshift.dns_name }}" -n "{{ engagement_name }}"-"{{ item.item.item.name }}" -f /Users/philiphayes/projects/innovationLab/tools/rhmap/ansible/fh-mbaas-template-1node.json
     register: openshiftApps
+    when: item.item.rc == 1
     with_items: 
       "{{ serviceKeys.results }}"
-    ignore_errors: yes
  
 
     
