@@ -9,7 +9,7 @@
     changed_when: false
     register: project_test
   - debug: var=project_test
-  - name: Create projects
+  - name: Create project
     command: >
       oc
       new-project "{{ engagement_name }}"-"{{ item.item.name }}"

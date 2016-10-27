@@ -4,12 +4,22 @@
   "metadata": {
     "name": "fh-mbaas",
     "annotations": {
-      "templateVersion": "0.19.2",
+      "templateVersion": "0.22.169-redhat-4",
       "description": "Red Hat Mobile Backend as a Service template",
       "iconClass": "icon-nodejs"
     }
   },
   "objects": [
+    {
+      "kind": "ConfigMap",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "fh-mbaas-info"
+      },
+      "data": {
+        "version": "4.2.0"
+      }
+    },
     {
       "kind": "Service",
       "apiVersion": "v1",
@@ -22,18 +32,12 @@
       "spec": {
         "ports": [
           {
-            "name": "fh-mbaas-service-ports",
-            "protocol": "TCP",
-            "port": 8080,
-            "targetPort": 8080,
-            "nodePort": 0
+            "port": 8080
           }
         ],
         "selector": {
           "name": "fh-mbaas"
-        },
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
+        }
       }
     },
     {
@@ -48,18 +52,12 @@
       "spec": {
         "ports": [
           {
-            "name": "fh-messaging-service-ports",
-            "protocol": "TCP",
-            "port": 8080,
-            "targetPort": 8080,
-            "nodePort": 0
+            "port": 8080
           }
         ],
         "selector": {
           "name": "fh-messaging"
-        },
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
+        }
       }
     },
     {
@@ -74,18 +72,12 @@
       "spec": {
         "ports": [
           {
-            "name": "fh-metrics-service-ports",
-            "protocol": "TCP",
-            "port": 8080,
-            "targetPort": 8080,
-            "nodePort": 0
+            "port": 8080
           }
         ],
         "selector": {
           "name": "fh-metrics"
-        },
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
+        }
       }
     },
     {
@@ -114,36 +106,45 @@
         ],
         "selector": {
           "name": "fh-statsd"
-        },
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
+        }
       }
     },
     {
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "mongodb-service",
+        "name": "mongodb-1",
         "labels": {
-          "name": "mongodb-service"
+          "name": "mongodb-1"
         }
       },
       "spec": {
         "ports": [
           {
-            "protocol": "TCP",
-            "port": 27017,
-            "targetPort": 27017,
-            "nodePort": 0
+            "port": 27017
           }
         ],
         "selector": {
           "name": "mongodb-replica"
         },
-        "portalIP": "None",
-        "clusterIP": "None",
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
+        "clusterIP": "None"
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "mongodb-claim-1"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "50Gi"
+          }
+        }
       }
     },
     {
@@ -158,11 +159,6 @@
       "spec": {
         "strategy": {
           "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 300
-          },
           "resources": {
             "limits": {
               "cpu": "800m",
@@ -196,11 +192,18 @@
                 "image": "${FH_MBAAS_IMAGE}:${FH_MBAAS_IMAGE_VERSION}",
                 "ports": [
                   {
-                    "containerPort": 8080,
-                    "protocol": "TCP"
+                    "containerPort": 8080
                   }
                 ],
                 "env": [
+                  {
+                    "name": "MBAAS_NAMESPACE",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "fieldPath": "metadata.namespace"
+                      }
+                    }
+                  },
                   {
                     "name": "FH_CLUSTER",
                     "value": "${FH_CLUSTER}"
@@ -247,6 +250,10 @@
                   {
                     "name": "FH_LOG_LEVEL",
                     "value": "${FH_DEFAULT_LOG_LEVEL}"
+                  },
+                  {
+                    "name": "MONGODB_REPLICA_NAME",
+                    "value": "${MONGODB_REPLICA_NAME}"
                   }
                 ],
                 "resources": {
@@ -259,16 +266,9 @@
                     "memory": "200Mi"
                   }
                 },
-                "terminationMessagePath": "/dev/termination-log",
-                "imagePullPolicy": "IfNotPresent",
-                "securityContext": {
-                  "capabilities": {},
-                  "privileged": false
-                }
+                "imagePullPolicy": "IfNotPresent"
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
       }
@@ -285,11 +285,6 @@
       "spec": {
         "strategy": {
           "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 300
-          },
           "resources": {
             "limits": {
               "cpu": "400m",
@@ -323,30 +318,13 @@
                 "image": "${FH_MESSAGING_IMAGE}:${FH_MESSAGING_IMAGE_VERSION}",
                 "ports": [
                   {
-                    "containerPort": 8080,
-                    "protocol": "TCP"
+                    "containerPort": 8080
                   }
                 ],
                 "env": [
                   {
                     "name": "FH_MESSAGING_CRON",
                     "value": "10 0 * * *"
-                  },
-                  {
-                    "name": "FH_MBAASID",
-                    "value": "${FH_MBAASID}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_USER",
-                    "value": "${MONGODB_FHMETRICS_USER}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_PASSWORD",
-                    "value": "${MONGODB_FHMETRICS_PASSWORD}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_DATABASE",
-                    "value": "fh-metrics"
                   },
                   {
                     "name": "MONGODB_FHREPORTING_USER",
@@ -368,6 +346,10 @@
                   {
                     "name": "FH_LOG_LEVEL",
                     "value": "${FH_DEFAULT_LOG_LEVEL}"
+                  },
+                  {
+                    "name": "MONGODB_REPLICA_NAME",
+                    "value": "${MONGODB_REPLICA_NAME}"
                   }
                 ],
                 "resources": {
@@ -380,16 +362,9 @@
                     "memory": "200Mi"
                   }
                 },
-                "terminationMessagePath": "/dev/termination-log",
-                "imagePullPolicy": "IfNotPresent",
-                "securityContext": {
-                  "capabilities": {},
-                  "privileged": false
-                }
+                "imagePullPolicy": "IfNotPresent"
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
       }
@@ -406,11 +381,6 @@
       "spec": {
         "strategy": {
           "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 300
-          },
           "resources": {
             "limits": {
               "cpu": "400m",
@@ -444,8 +414,7 @@
                 "image": "${FH_METRICS_IMAGE}:${FH_METRICS_IMAGE_VERSION}",
                 "ports": [
                   {
-                    "containerPort": 8080,
-                    "protocol": "TCP"
+                    "containerPort": 8080
                   }
                 ],
                 "env": [
@@ -466,18 +435,6 @@
                     "value": "fh-reporting"
                   },
                   {
-                    "name": "MONGODB_FHMETRICS_USER",
-                    "value": "${MONGODB_FHMETRICS_USER}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_PASSWORD",
-                    "value": "${MONGODB_FHMETRICS_PASSWORD}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_DATABASE",
-                    "value": "fh-metrics"
-                  },
-                  {
                     "name": "FH_METRICS_API_KEY",
                     "description": "API Key for calling fh-metrics",
                     "value": "${FH_METRICS_API_KEY}"
@@ -485,6 +442,10 @@
                   {
                     "name": "FH_LOG_LEVEL",
                     "value": "${FH_DEFAULT_LOG_LEVEL}"
+                  },
+                  {
+                    "name": "MONGODB_REPLICA_NAME",
+                    "value": "${MONGODB_REPLICA_NAME}"
                   }
                 ],
                 "resources": {
@@ -497,16 +458,9 @@
                     "memory": "200Mi"
                   }
                 },
-                "terminationMessagePath": "/dev/termination-log",
-                "imagePullPolicy": "IfNotPresent",
-                "securityContext": {
-                  "capabilities": {},
-                  "privileged": false
-                }
+                "imagePullPolicy": "IfNotPresent"
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
       }
@@ -523,11 +477,6 @@
       "spec": {
         "strategy": {
           "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 300
-          },
           "resources": {
             "limits": {
               "cpu": "400m",
@@ -561,8 +510,7 @@
                 "image": "${FH_STATSD_IMAGE}:${FH_STATSD_IMAGE_VERSION}",
                 "ports": [
                   {
-                    "containerPort": 8080,
-                    "protocol": "TCP"
+                    "containerPort": 8080
                   }
                 ],
                 "env": [
@@ -586,16 +534,9 @@
                     "memory": "200Mi"
                   }
                 },
-                "terminationMessagePath": "/dev/termination-log",
-                "imagePullPolicy": "IfNotPresent",
-                "securityContext": {
-                  "capabilities": {},
-                  "privileged": false
-                }
+                "imagePullPolicy": "IfNotPresent"
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
       }
@@ -632,6 +573,14 @@
         "selector": {
           "name": "mongodb-replica"
         },
+        "volumes": [
+          {
+            "name": "mongodb-data-volume",
+            "persistentVolumeClaim": {
+              "claimName": "mongodb-claim-1"
+            }
+          }
+        ],
         "template": {
           "metadata": {
             "labels": {
@@ -639,24 +588,37 @@
             }
           },
           "spec": {
+            "volumes": [
+              {
+                "name": "mongodb-data-volume",
+                "persistentVolumeClaim": {
+                  "claimName": "mongodb-claim-1"
+                }
+              }
+            ],
             "containers": [
               {
-                "name": "mongodb-service",
+                "name": "mongodb-1",
                 "image": "${MONGODB_IMAGE}:${MONGODB_IMAGE_VERSION}",
                 "ports": [
                   {
-                    "containerPort": 27017,
-                    "protocol": "TCP"
+                    "containerPort": 27017
+                  }
+                ],
+                "volumeMounts": [
+                  {
+                    "name": "mongodb-data-volume",
+                    "mountPath": "/var/lib/mongodb/data"
                   }
                 ],
                 "env": [
                   {
                     "name": "MONGODB_REPLICA_NAME",
-                    "value": "rs0"
+                    "value": "${MONGODB_REPLICA_NAME}"
                   },
                   {
                     "name": "MONGODB_SERVICE_NAME",
-                    "value": "mongodb-service"
+                    "value": "mongodb"
                   },
                   {
                     "name": "MONGODB_KEYFILE_VALUE",
@@ -695,18 +657,6 @@
                     "value": "fh-statsd"
                   },
                   {
-                    "name": "MONGODB_FHMETRICS_USER",
-                    "value": "${MONGODB_FHMETRICS_USER}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_PASSWORD",
-                    "value": "${MONGODB_FHMETRICS_PASSWORD}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_DATABASE",
-                    "value": "fh-metrics"
-                  },
-                  {
                     "name": "MONGODB_FHREPORTING_USER",
                     "value": "${MONGODB_FHREPORTING_USER}"
                   },
@@ -729,12 +679,9 @@
                     "memory": "200Mi"
                   }
                 },
-                "terminationMessagePath": "/dev/termination-log",
                 "imagePullPolicy": "IfNotPresent"
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
       }
@@ -755,22 +702,29 @@
             "image": "${MONGODB_IMAGE}:${MONGODB_IMAGE_VERSION}",
             "ports": [
               {
-                "containerPort": 27017,
-                "protocol": "TCP"
+                "containerPort": 27017
               }
             ],
             "command": [
-              "run-mongod.sh",
+              "run-mongod",
               "initiate"
             ],
             "env": [
               {
+                "name": "METADATA_NAMESPACE",
+                "valueFrom": {
+                  "fieldRef": {
+                    "fieldPath": "metadata.namespace"
+                  }
+                }
+              },
+              {
                 "name": "MONGODB_REPLICA_NAME",
-                "value": "rs0"
+                "value": "${MONGODB_REPLICA_NAME}"
               },
               {
                 "name": "MONGODB_SERVICE_NAME",
-                "value": "mongodb-service"
+                "value": "mongodb"
               },
               {
                 "name": "MONGODB_KEYFILE_VALUE",
@@ -797,18 +751,6 @@
                 "value": "${MONGODB_ADMIN_PASSWORD}"
               },
               {
-                "name": "MONGODB_FHMETRICS_USER",
-                "value": "${MONGODB_FHMETRICS_USER}"
-              },
-              {
-                "name": "MONGODB_FHMETRICS_PASSWORD",
-                "value": "${MONGODB_FHMETRICS_PASSWORD}"
-              },
-              {
-                "name": "MONGODB_FHMETRICS_DATABASE",
-                "value": "fh-metrics"
-              },
-              {
                 "name": "MONGODB_FHREPORTING_USER",
                 "value": "${MONGODB_FHREPORTING_USER}"
               },
@@ -829,12 +771,10 @@
                 "value": "${ENDPOINT_COUNT}"
               }
             ],
-            "terminationMessagePath": "/dev/termination-log",
             "imagePullPolicy": "IfNotPresent"
           }
         ],
-        "restartPolicy": "Never",
-        "dnsPolicy": "ClusterFirst"
+        "restartPolicy": "Never"
       }
     },
     {
@@ -911,64 +851,53 @@
       "from": "[a-zA-Z0-9]{40}"
     },
     {
-      "name": "MONGODB_FHMETRICS_USER",
-      "value": "u-metrics",
-      "description": "The Metrics user name"
-    },
-    {
-      "name": "MONGODB_FHMETRICS_PASSWORD",
-      "description": "The MongoDB Metrics password",
-      "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}"
-    },
-    {
       "name": "FH_MBAAS_IMAGE",
-      "value": "docker.io/rhmap/fh-mbaas",
+      "value": "rhmap42/fh-mbaas",
       "description": "The name of the fh-mbaas image"
     },
     {
       "name": "FH_MBAAS_IMAGE_VERSION",
-      "value": "3.7.1-814",
+      "value": "5.2.3-4",
       "description": "The version for the FH_MBAAS_IMAGE"
     },
     {
       "name": "FH_MESSAGING_IMAGE",
-      "value": "docker.io/rhmap/fh-messaging",
+      "value": "rhmap42/fh-messaging",
       "description": "The name of the fh-messaging image"
     },
     {
       "name": "FH_MESSAGING_IMAGE_VERSION",
-      "value": "1.3.0-328",
+      "value": "3.0.1-3",
       "description": "The version for the FH_MESSAGING_IMAGE"
     },
     {
       "name": "FH_METRICS_IMAGE",
-      "value": "docker.io/rhmap/fh-metrics",
+      "value": "rhmap42/fh-metrics",
       "description": "The name of the fh-metrics image"
     },
     {
       "name": "FH_METRICS_IMAGE_VERSION",
-      "value": "1.2.1-329",
+      "value": "3.0.1-4",
       "description": "The version for the FH_METRICS_IMAGE"
     },
     {
       "name": "FH_STATSD_IMAGE",
-      "value": "docker.io/rhmap/fh-statsd",
+      "value": "rhmap42/fh-statsd",
       "description": "The name of the fh-statsd image"
     },
     {
       "name": "FH_STATSD_IMAGE_VERSION",
-      "value": "1.3.0-80",
+      "value": "2.0.2-1",
       "description": "The version for the FH_STATSD_IMAGE"
     },
     {
       "name": "MONGODB_IMAGE",
-      "value": "docker.io/rhmap/mongodb",
+      "value": "rhmap42/mongodb",
       "description": "The name of the mongodb image"
     },
     {
       "name": "MONGODB_IMAGE_VERSION",
-      "value": "2.4-12",
+      "value": "3.2-9",
       "description": "The version for the MONGODB_IMAGE"
     },
     {
@@ -986,7 +915,7 @@
     {
       "name": "MBAAS_ROUTER_DNS",
       "description": "The DNS name for the MBaaS Router",
-      "value": "mbaas.example.com"
+      "value": ""
     },
     {
       "name": "ENDPOINT_COUNT",
@@ -1018,6 +947,11 @@
       "name": "FH_DEFAULT_LOG_LEVEL",
       "description": "A default log level for all MBaaS components",
       "value": "info"
+    },
+    {
+      "name": "MONGODB_REPLICA_NAME",
+      "description": "The mongodb replicaset name",
+      "value": "rs0"
     }
   ]
 }
